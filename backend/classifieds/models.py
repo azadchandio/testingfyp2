@@ -124,6 +124,9 @@ class Category(models.Model):
     order = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return f"{self.name}, {self.slug}"
+
 class SubCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='subcategories')
     name = models.CharField(max_length=100)
@@ -132,6 +135,9 @@ class SubCategory(models.Model):
 
     class Meta:
         unique_together = ('category', 'slug')
+
+    def __str__(self):
+        return f"{self.name}, {self.slug}"    
 
 # Location Model
 class Location(models.Model):
@@ -223,12 +229,18 @@ class Advertisement(models.Model):
             
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.title  # Ensure this returns a meaningful name    
+
 # Image Model
 class Image(models.Model):
     advertisement = models.ForeignKey(Advertisement, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='advertisement_images/')
     is_primary = models.BooleanField(default=False)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.image}"
 
 # Favorite Model
 class Favorite(models.Model):

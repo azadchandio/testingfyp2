@@ -1,0 +1,132 @@
+.listing-details-wrapper {
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 160px);
+    padding: 60px 40px; /* Increased padding */
+}
+
+.listing-details-container {
+    max-width: 1200px; /* Increased max-width */
+    margin: 0 auto;
+}
+
+.listing-heading {
+    display: flex;
+    /* align-items: center; */
+    justify-content: center;
+    font-size: 36px; /* Increased font size */
+    color: #38528F;
+    margin-bottom: 60px; /* Increased margin */
+    font-weight: 600;
+}
+
+.dot {
+    color: #F57D26;
+}
+
+.listing-form {
+    background: white;
+    border-radius: 16px; /* Increased border radius */
+    padding: 40px; /* Increased padding */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Increased box shadow */
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px; /* Increased gap */
+    margin-bottom: 30px; /* Increased margin */
+}
+
+.form-group {
+    margin-bottom: 30px; /* Increased margin */
+}
+
+label {
+    display: block;
+    color: #333;
+    margin-bottom: 12px; /* Increased margin */
+    font-size: 16px; /* Increased font size */
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 16px; /* Increased padding */
+    border: 2px solid #ddd; /* Increased border thickness */
+    border-radius: 10px; /* Increased border radius */
+    font-size: 16px; /* Increased font size */
+}
+
+.image-upload-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px; /* Increased gap */
+}
+
+.image-upload-box {
+    aspect-ratio: 1;
+    background: #f8f9fa;
+    border: 3px dashed #ddd; /* Increased border thickness */
+    border-radius: 10px; /* Increased border radius */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.upload-icon {
+    color: #38528F;
+    font-size: 28px; /* Increased font size */
+}
+
+.price-input {
+    position: relative;
+}
+
+.currency {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+input[name="price"] {
+    padding-left: 48px; /* Increased padding */
+}
+
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Increased gap */
+}
+
+.checkbox input {
+    width: auto;
+}
+
+.publish-button {
+    width: 100%;
+    padding: 18px; /* Increased padding */
+    background: #38528F;
+    color: white;
+    border: none;
+    border-radius: 10px; /* Increased border radius */
+    font-size: 18px; /* Increased font size */
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.publish-button:hover {
+    background: #2c4172;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .image-upload-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px; /* Adjusted gap */
+    }
+}

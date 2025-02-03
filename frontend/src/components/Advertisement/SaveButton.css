@@ -1,0 +1,37 @@
+.save-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.save-button:hover {
+    transform: scale(1.1);
+    background: white;
+}
+
+.save-button svg {
+    font-size: 18px;
+    color: var(--primary-color);
+}
+
+.save-button.saved svg {
+    color: #e74c3c;
+    animation: pop 0.3s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+} 

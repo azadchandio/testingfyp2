@@ -1,0 +1,95 @@
+.add-card-wrapper {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 160px);
+  padding: 40px 20px;
+}
+
+.add-card-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.add-card-heading {
+  display: flex;
+  justify-content: center;
+  font-size: 32px;
+  color: #38528F;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.dot {
+  color: #F57D26;
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #666;
+  font-size: 14px;
+}
+
+.form-input {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: #f8f9fa;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #38528F;
+}
+
+.form-input::placeholder {
+  color: #999;
+}
+
+.confirm-button {
+  width: 100%;
+  padding: 15px;
+  background: #38528F;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  margin-top: 20px;
+}
+
+.confirm-button:hover {
+  background: #2c4172;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .add-card-heading {
+    font-size: 28px;
+  }
+
+  .form-input {
+    font-size: 14px;
+  }
+} 

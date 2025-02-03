@@ -1,0 +1,150 @@
+.saved-listings-wrapper {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 160px);
+  padding: 40px 20px;
+}
+
+.saved-listings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.listings-heading {
+  font-size: 32px;
+  color: #38528F;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.dot {
+  color: #F57D26;
+}
+
+.listings-tabs {
+  margin-bottom: 30px;
+}
+
+.tab-button {
+  padding: 12px 30px;
+  background: #38528F;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.tab-button.active {
+  background: #38528F;
+}
+
+.listings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.listing-image {
+  width: 300px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.listing-content {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.listing-header {
+  margin-bottom: 15px;
+}
+
+.listing-title {
+  font-size: 24px;
+  color: #38528F;
+  margin: 0;
+  display: inline;
+}
+
+.listing-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.listing-category {
+  color: #666;
+  margin-left: 8px;
+}
+
+.listing-details {
+  margin-bottom: 20px;
+}
+
+.listing-price {
+  display: block;
+  color: #F57D26;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.listing-meta {
+  color: #666;
+  font-size: 14px;
+}
+
+.separator {
+  margin: 0 10px;
+}
+
+.remove-button {
+  align-self: flex-start;
+  padding: 8px 20px;
+  background: transparent;
+  color: #F57D26;
+  border: 1px solid #F57D26;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.remove-button:hover {
+  background: #F57D26;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .listing-card {
+    flex-direction: column;
+  }
+
+  .listing-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .listings-heading {
+    font-size: 28px;
+  }
+
+  .listing-title {
+    font-size: 20px;
+  }
+} 

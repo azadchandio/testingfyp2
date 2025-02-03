@@ -1,0 +1,387 @@
+/* Global Styles */
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Manrope:wght@200..800&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Manrope:wght@200..800&family=Mulish:ital,wght@0,200..1000;1,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Bricolage Grotesque", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #ffffff;
+}
+
+.page-container {
+  max-width: 1250px;
+  min-height: 60vh;
+  margin: 50px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgb(0 0 0 / 10%);
+  align-self: center;
+}
+
+.main-Content-Container {
+  gap: 2rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 1440px; /* Add maximum width */
+  margin: 0 auto;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 35px; /* Increased gap between fields */
+}
+
+/* Floating label container */
+.floating-label-container {
+  flex: 1;
+  position: relative;
+  padding-right: 20px;
+}
+
+/* Input field */
+.floating-input {
+  width: 536px;
+  height: 70px;
+  padding: 0px 0px 0px 20px; /* Added 20px padding to the right side */
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  background: #fff;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.floating-input:focus {
+  border-color: #f57d26;
+}
+
+/* Label styling */
+.floating-label {
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #888;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+/* Terms and conditions checkbox */
+input.checkbox {
+  width: 10px;
+  transform: scale(2); /* Scale the checkbox size */
+  margin-right: 10px;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+/* OTP, Pass_reset, Personaldata, Forget ....... */
+.centered-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* When the input is focused or has a value, the label moves up */
+.floating-input:focus + .floating-label,
+.floating-input:not(:placeholder-shown) + .floating-label {
+  top: -1px;
+  background-color: white;
+  font-size: 16px;
+  color: #f57d26;
+  padding: 0 2px;
+}
+
+/* Button styling */
+
+.btn-orange {
+  width: 100%;
+  max-width: 536px;
+  height: 70px;
+  padding: 10px;
+  font-size: 24px;
+  background-color: #f57d26;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+}
+.btn-orange:hover {
+  background-color: #d8691f;
+  transition: background-color 0.3s ease;
+}
+
+/* Show Password toggle */
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 25px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+}
+.toggle-password:hover {
+  color: #f57d26;
+}
+
+/* Remeber and forget */
+.remember-me-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.remember-me {
+  display: flex;
+  align-items: center;
+}
+
+.remember-me input {
+  margin-right: 5px;
+}
+
+.forget-password-link {
+  color: #f57d26; /* Your preferred color */
+  text-decoration: none;
+}
+
+.forget-password-link:hover {
+  text-decoration: underline;
+}
+
+
+/* Links */
+a {
+  color: #f57d26;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* SocialLoginButtons */
+
+.social-login-section {
+  width: 536px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.google,
+.facebook,
+.apple {
+  width: 100%;
+  max-width: 536px;
+  height: 70px;
+  padding: 10px;
+  font-size: 24px;
+  font-weight: 400;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.google,
+.facebook {
+  background: #fff;
+  color: #1c1c1c;
+  border: 2px solid #1c1c1c25;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.apple {
+  background: #1c1c1c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.google:hover,
+.facebook:hover {
+  border: 2px solid #1c1c1c;
+  transition: all 0.3s ease;
+  background-color: transparent;
+}
+
+.apple:hover {
+  transition: all 0.5s ease;
+  background-color: black;
+}
+/* end SocialLoginButtons */
+
+/* flexing */
+
+.sections {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.login,
+.divider,
+.btns {
+  flex: 1; /* Ensures equal spacing */
+  display: flex;
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+
+.divider {
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  width: 100%; /* Full width to align with content */
+  margin: 20px 0; /* Add space above and below the divider */
+}
+
+.divider h2 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #888; /* Adjust the color as needed */
+  text-align: center;
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+}
+
+h2.titlee {
+  margin: 0;
+  padding: 0;
+  align-self: start;
+  color: #38528f;
+  font-size: 32px;
+  font-weight: 500;
+}
+h2.titlee::after {
+  content: ".";
+  color: #f57d26;
+  font-size: larger;
+}
+
+/* flexing ends */
+
+/* Responsive  */
+/* Responsive Styles */
+@media screen and (max-width: 1200px) {
+  .form-container {
+    gap: 25px; /* Increase the gap between fields */
+  }
+  .page-container {
+    max-width: 95%; /* Reduce the width on medium screens */
+    margin: 20px auto;
+    padding: 15px;
+  }
+  .sections {
+    flex-direction: column; /* Stack sections vertically */
+    gap: 40px; /* Increase the gap between sections */
+  }
+  .login,
+  .divider,
+  .btns {
+    flex: unset; /* Allow natural width of the content */
+    width: 100%; /* Full width for smaller devices */
+  }
+  .divider h2 {
+    font-size: 20px; /* Adjust font size for smaller screens */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 14px; /* Adjust base font size for smaller screens */
+  }
+  .floating-input {
+    width: 100%; /* Full width for buttons */
+    height: 60px; /* Adjust height */
+    font-size: 20px; /* Adjust font size */
+  }
+  .page-container {
+    padding: 10px;
+  }
+  .sections {
+    gap: 15px;
+  }
+  .social-login-section {
+    width: 100%; /* Make buttons take full width */
+    gap: 20px;
+  }
+  .google,
+  .facebook,
+  .apple {
+    width: 100%; /* Full width for buttons */
+    height: 50px; /* Adjust height */
+    font-size: 20px; /* Adjust font size */
+    font-size: 18px; /* Adjust button font size */
+    height: 60px; /* Reduce button height */
+  }
+  .btn-orange {
+    width: 100%; /* Full width for buttons */
+    height: 50px; /* Adjust height */
+    font-size: 20px; /* Adjust font size */
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .form-container {
+    gap: 15px;
+    width: 100%;
+  }
+  h2.titlee {
+    font-size: 24px; /* Adjust title font size */
+  }
+  .floating-input {
+    height: 50px; /* Reduce input height */
+    font-size: 14px; /* Adjust input font size */
+  }
+  .floating-label {
+    font-size: 12px; /* Adjust label font size */
+  }
+  .social-login-section {
+    gap: 15px; /* Reduce gap between social login buttons */
+  }
+  .button.google,
+  .button.facebook,
+  .button.apple {
+    font-size: 16px; /* Further reduce button font size */
+    height: 50px; /* Reduce button height */
+  }
+  button {
+    height: 50px;
+    font-size: 16px;
+  }
+  .toggle-password {
+    font-size: 12px;
+  }
+  .link-text {
+    font-size: 12px;
+  }
+  .floating-input:focus + .floating-label,
+  .floating-input:not(:placeholder-shown) + .floating-label {
+    font-size: 12px;
+  }
+}

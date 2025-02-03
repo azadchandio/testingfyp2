@@ -1,0 +1,195 @@
+.manage-listings-wrapper {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 160px);
+  padding: 40px 20px;
+}
+
+.manage-listings-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.listings-heading {
+  font-size: 32px;
+  color: #38528F;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.dot {
+  color: #F57D26;
+}
+
+.listings-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: none;
+  background: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-button.active {
+  background: #38528F;
+  color: white;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.listing-image {
+  width: 300px;
+  height: 200px;
+  flex-shrink: 0;
+}
+
+.listing-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.listing-content {
+  padding: 20px;
+  flex: 1;
+}
+
+.listing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.listing-title {
+  font-size: 24px;
+  color: #38528F;
+  margin: 0;
+}
+
+.listing-category {
+  color: #666;
+  margin-left: 8px;
+}
+
+.listing-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+
+.status-badge.active {
+  background: #e6f4ea;
+  color: #1e7e34;
+}
+
+.status-badge.inactive {
+  background: #f8f9fa;
+  color: #666;
+}
+
+.status-badge.deleted {
+  background: #ffebee;
+  color: #dc3545;
+}
+
+.more-options {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.listing-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #666;
+}
+
+.edit-button {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 15px;
+  border: 1px solid #38528F;
+  border-radius: 6px;
+  color: #38528F;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.feature-button,
+.republish-button,
+.recover-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.feature-button {
+  background: #38528F;
+}
+
+.republish-button {
+  background: #1e7e34;
+}
+
+.recover-button {
+  background: #38528F;
+}
+
+@media (max-width: 768px) {
+  .listing-card {
+    flex-direction: column;
+  }
+
+  .listing-image {
+    width: 100%;
+  }
+
+  .listing-stats {
+    flex-wrap: wrap;
+  }
+
+  .edit-button {
+    margin-left: 0;
+    margin-top: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+} 

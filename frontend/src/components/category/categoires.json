@@ -1,0 +1,75 @@
+{
+    "mainCategories": [
+      {
+        "id": "all",
+        "name": "See All",
+        "icon": "faThLarge",
+        "color": "#FF6B00"
+      },
+      {
+        "id": "mobiles",
+        "name": "Mobiles",
+        "icon": "faMobile",
+        "color": "#3B5998"
+      },
+      {
+        "id": "vehicles",
+        "name": "Vehicles",
+        "icon": "faCar"
+      },
+      {
+        "id": "properties",
+        "name": "Properties",
+        "subtext": "Rent & Sell",
+        "icon": "faBuilding"
+      },
+      {
+        "id": "electronics",
+        "name": "Electronics",
+        "subtext": "& Gadgets",
+        "icon": "faGamepad"
+      },
+      {
+        "id": "bikes",
+        "name": "Bikes",
+        "icon": "faMotorcycle"
+      },
+      {
+        "id": "furniture",
+        "name": "Furniture &",
+        "subtext": "Decor",
+        "icon": "faCouch"
+      },
+      {
+        "id": "fashion",
+        "name": "Fashion &",
+        "subtext": "Clothing",
+        "icon": "faTshirt"
+      },
+      {
+        "id": "computers",
+        "name": "Computer &",
+        "subtext": "Laptop",
+        "icon": "faDesktop"
+      },
+      {
+        "id": "jobs",
+        "name": "Jobs",
+        "icon": "faBriefcase"
+      },
+      {
+        "id": "toys",
+        "name": "Kids Toys",
+        "icon": "faTeddyBear"
+      }
+    ],
+"subCategories": {
+    "mobiles": ["Cell Phones", "Accessories", "Smart Watches", "Tablets"],
+    "bikes": ["Motorcycles", "Bicycles", "Spare Parts", "Bike Accessories", "Scooters", "ATV & Quads"],
+    "jobs": ["Online", "Other Jobs", "Part Time", "Sales", "Marketing", "Customer Service", "Education", "Restaurants & Hospitality", "Domestic Staff", "Medical", "Accounting & Finance", "Delivery Riders", "IT & Networking", "Graphic Design", "Hotels & Tourism", "Manufacturing", "Content Writing", "Human Resources", "Security", "Clerical & Administration", "Engineering", "Real Estate", "Advertising & PR", "Internships", "Architecture & Interior Design"],
+    "furniture & decor": ["Sofa & Chairs", "Beds & Wardrobes", "Tables & Dining", "Other Household Items", "Home Decoration", "Office Furniture", "Garden & Outdoor", "Painting & Mirrors", "Curtains & Blinds", "Rugs & Carpets", "Bathroom Accessories"],
+    "vehicles": ["Cars", "Cars Accessories", "Spare Parts", "Buses, Vans & Trucks", "Rickshaw & Chingchi", "Tractors & Trailers", "Cars On Installments", "Other Vehicles", "Boats"], 
+    "business & industry": ["Other Business & Industry", "Trade & Industrial Machinery", "Medical & Pharma", "Construction & Machinery", "Business For Sale", "Agriculture"],
+    "fashion & beauty": ["Clothes", "Watches", "Footwear", "Wedding", "Skin & Hair", "Jewellery", "Bags", "Fragrance", "Makeup", "Fashion Accessories", "Other Fashion"]
+}
+  }

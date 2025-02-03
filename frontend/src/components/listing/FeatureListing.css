@@ -1,0 +1,148 @@
+.feature-listing-wrapper {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 160px);
+  padding: 40px 20px;
+}
+
+.feature-listing-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.feature-heading {
+  display: flex;
+  justify-content: center;  
+  font-size: 32px;
+  color: #38528F;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.dot {
+  color: #F57D26;
+}
+
+.listing-selection {
+  margin-bottom: 30px;
+}
+
+.selection-label {
+  color: #666;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+.selected-listing {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.listing-image {
+  width: 80px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 15px;
+}
+
+.listing-details {
+  flex: 1;
+}
+
+.listing-title {
+  color: #38528F;
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+.listing-price {
+  color: #F57D26;
+  font-weight: 500;
+}
+
+.feature-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.option-group label {
+  display: block;
+  color: #666;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.custom-select {
+  position: relative;
+}
+
+.custom-select select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  appearance: none;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+}
+
+.custom-select::after {
+  content: '▼';
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  pointer-events: none;
+}
+
+.cost-summary {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.cost-label {
+  font-weight: 500;
+  color: #333;
+  margin-right: 10px;
+}
+
+.cost-amount {
+  color: #38528F;
+  font-weight: 600;
+}
+
+.payment-button {
+  width: 100%;
+  padding: 15px;
+  background: #38528F;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.payment-button:hover {
+  background: #2c4172;
+}
+
+@media (max-width: 768px) {
+  .feature-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .feature-heading {
+    font-size: 28px;
+  }
+} 

@@ -1,0 +1,116 @@
+
+.recommended-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+  
+  /* Section Title */
+  .section-reccommended-title {
+    color: #3B5998;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 32px;
+  }
+  
+  .section-reccommended-title .highlight {
+    color: #FF7A00; /* Orange color */
+  }
+  
+  /* Products Grid */
+  .products-reccommended-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 24px;
+  }
+  
+  @media (min-width: 640px) {
+    .products-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .products-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  
+  /* Product Card */
+  .product-reccommended-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+  }
+  
+  .product-reccommended-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Image Container */
+  .image-reccommended-container {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  
+  .product-reccommended-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+  }
+  
+  .product-reccommended-image:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Content Container */
+  .content-reccommended-container {
+    padding: 16px;
+  }
+  
+  .product-reccommended-price {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #FF7A00;
+    margin-bottom: 8px;
+  }
+  
+  .product-reccommended-title {
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    transition: color 0.3s;
+  }
+  
+  .product-reccommended-title:hover {
+    color: #3B5998;
+  }
+  
+  /* Info Section */
+  .product-reccommended-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #666;
+  }
+  
+  .info-reccommended-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  .icon {
+    color: #999;
+  }
+  

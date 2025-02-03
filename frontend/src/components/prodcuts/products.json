@@ -1,0 +1,52 @@
+{
+    "products": [
+      {
+        "id": 1,
+        "title": "Tabs /Tabs For Kids/Tabs For Students",
+        "price": 11999,
+        "location": "Hyderabad, Pakistan",
+        "timePosted": "1 hour ago",
+        "image": "../images/car.jpg"
+      },
+      {
+        "id": 2,
+        "title": "Luxury Apartment With Full Size",
+        "price": 3400000,
+        "location": "Hyderabad, Pakistan",
+        "timePosted": "1 hour ago",
+        "image": "../images/car.jpg"
+      },
+      {
+        "id": 3,
+        "title": "3 Bed Caravan For Rent BS35",
+        "price": 180000,
+        "location": "Hyderabad, Pakistan",
+        "timePosted": "1 hour ago",
+        "image": "../images/car.jpg"
+      },
+      {
+        "id": 5,
+        "title": "2018 Vauxhall Grandland X 1.5",
+        "price": 8900000,
+        "location": "Hyderabad, Pakistan",
+        "timePosted": "1 hour ago",
+        "image": "../images/car.jpg"
+      },
+      {
+        "id": 6,
+        "title": "2018 Vauxhall Grandland X 1.5",
+        "price": 8900000,
+        "location": "Hyderabad, Pakistan",
+        "timePosted": "1 hour ago",
+        "image": "../images/car.jpg"
+      },
+      {
+        "id": 7,
+        "title": "2018 Vauxhall Grandland X 1.5",
+        "price": 8900000,
+        "location": "Hyderabad, Pakistan",
+        "timePosted": "1 hour ago",
+        "image": "../images/car.jpg"
+      }
+    ]
+  }
