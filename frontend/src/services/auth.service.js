@@ -43,10 +43,12 @@ const login = async (username, password) => {
             username,
             password
         });
-        // Store both tokens and user data
+        
+        // Ensure both access and refresh tokens are stored
         localStorage.setItem('token', response.data.access);
         localStorage.setItem('refreshToken', response.data.refresh);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        
         return response.data;
     } catch (error) {
         throw new Error(error.response?.data?.error || 'Login failed');

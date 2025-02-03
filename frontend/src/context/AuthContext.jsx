@@ -6,8 +6,8 @@ const AuthContext = createContext({
     user: null,
     login: () => {},
     logout: () => {},
-    loading: false,
-    setUser: () => {}
+    loading: true,
+    isAuthenticated: false
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -15,36 +15,45 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
 
     useEffect(() => {
-        // Check if user is logged in on mount
-        const token = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
-        
-        if (token && storedUser) {
-            setUser(JSON.parse(storedUser));
-            // Optionally verify token and refresh user data
-            authService.getProfile()
-                .then(userData => {
+        const checkAuthStatus = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const storedUser = localStorage.getItem('user');
+                
+                if (token && storedUser) {
+                    // Validate token by fetching profile
+                    const userData = await authService.getProfile();
                     setUser(userData);
-                })
-                .catch(() => {
-                    // If token is invalid, logout
-                    logout();
-                });
-        }
-        setLoading(false);
+                    setIsAuthenticated(true);
+                } else {
+                    setIsAuthenticated(false);
+                    setUser(null);
+                }
+            } catch (error) {
+                // Token is invalid or expired
+                logout();
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        checkAuthStatus();
     }, []);
 
     const login = (userData, token) => {
         setUser(userData);
+        setIsAuthenticated(true);
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(userData));
     };
 
     const logout = () => {
         setUser(null);
-        authService.logout(); // This will clear localStorage
+        setIsAuthenticated(false);
+        authService.logout();
     };
 
     return (
@@ -53,7 +62,8 @@ export const AuthProvider = ({ children }) => {
             login, 
             logout, 
             loading,
-            setUser // Expose setUser if you need to update user data
+            isAuthenticated,
+            setUser
         }}>
             {children}
         </AuthContext.Provider>
@@ -62,4 +72,4 @@ export const AuthProvider = ({ children }) => {
 
 AuthProvider.propTypes = {
     children: PropTypes.node.isRequired
-}; 
+};
