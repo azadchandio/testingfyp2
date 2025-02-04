@@ -1,24 +1,46 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaClock, FaBookmark } from "react-icons/fa";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { FaMapMarkerAlt, FaClock, FaBookmark, FaEdit, FaStar, FaEye, FaEnvelope, FaHandshake } from "react-icons/fa";
 import { LuMessageSquareMore } from "react-icons/lu";
 import { CiDollar } from "react-icons/ci";
 import { FaGreaterThan } from "react-icons/fa6";
-import { advertisementService } from "../../services/advertisement.service"; // Importing the service
+import { useAuth } from "../../context/AuthContext";
+import { advertisementService } from "../../services/advertisement.service";
 import "./ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // New state for additional listing metrics
+  const [listingMetrics, setListingMetrics] = useState({
+    views: 0,
+    offers: 0,
+    messages: 0
+  });
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductDetails = async () => {
       try {
         const data = await advertisementService.getAdvertisement(id);
         setProduct(data);
+
+        // Fetch listing metrics only if the current user is the ad owner
+        if (isAuthenticated && user?.id === data.user?.id) {
+          try {
+            const metrics = await advertisementService.getListingMetrics(id);
+            setListingMetrics(metrics);
+          } catch (metricsError) {
+            console.error("Failed to fetch listing metrics:", metricsError);
+          }
+        }
+
         setLoading(false);
       } catch (err) {
         setError("Failed to load product details. Please try again.");
@@ -26,24 +48,56 @@ const ProductDetail = () => {
       }
     };
 
-    fetchProduct();
-  }, [id]);
-
-  if (loading) return <div>Loading product details...</div>;
-  if (error) return <div>{error}</div>;
+    fetchProductDetails();
+  }, [id, isAuthenticated, user]);
 
   // Handlers for image carousel
   const handlePrevImage = () => {
+    if (!product || !product.images || product.images.length === 0) return;
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
     );
   };
 
   const handleNextImage = () => {
+    if (!product || !product.images || product.images.length === 0) return;
     setCurrentImageIndex((prevIndex) =>
       prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
     );
   };
+
+  // New method to handle edit listing
+  const handleEditListing = () => {
+    navigate(`/edit-listing/${id}`);
+  };
+
+  // New method to feature listing
+  const handleFeatureListing = async () => {
+    try {
+      await advertisementService.featureListing(id);
+      // Optionally show a success message or update UI
+      alert("Listing featured successfully!");
+    } catch (error) {
+      console.error("Failed to feature listing:", error);
+      alert("Failed to feature listing. Please try again.");
+    }
+  };
+
+  // Handler for sending a message
+  const handleSendMessage = () => {
+    navigate(`/messages/${id}`);
+  };
+
+  // Handler for sending an offer
+  const handleSendOffer = () => {
+    navigate(`/send-offer/${id}`);
+  };
+
+  if (loading) return <div>Loading product details...</div>;
+  if (error) return <div>{error}</div>;
+
+  // Check if current user is the ad owner
+  const isAdOwner = isAuthenticated && user?.id === product.user?.id;
 
   return (
     <div className="product-detail-wrapper">
@@ -101,15 +155,49 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Conditional Action Buttons */}
             <div className="action-buttons">
-              <button className="message-btn">
-                <LuMessageSquareMore /> Message Now
-              </button>
-              <button className="offer-btn">
-                <CiDollar /> Send an Offer
-              </button>
+              {isAdOwner ? (
+                <>
+                  <button className="edit-btn" onClick={handleEditListing}>
+                    <FaEdit /> Edit Listing
+                  </button>
+                  <button className="feature-btn" onClick={handleFeatureListing}>
+                    <FaStar /> Feature This Listing
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="message-btn" onClick={handleSendMessage}>
+                    <LuMessageSquareMore /> Message Now
+                  </button>
+                  <button className="offer-btn" onClick={handleSendOffer}>
+                    <CiDollar /> Send an Offer
+                  </button>
+                </>
+              )}
             </div>
+
+            {/* Listing Metrics for Ad Owner */}
+            {isAdOwner && (
+              <div className="listing-metrics">
+                <h3>Your Listing Performance</h3>
+                <div className="metrics-grid">
+                  <div className="metric-item">
+                    <FaEye /> <span>Total Views</span>
+                    <strong>{listingMetrics.views}</strong>
+                  </div>
+                  <div className="metric-item">
+                    <FaHandshake /> <span>Total Offers</span>
+                    <strong>{listingMetrics.offers}</strong>
+                  </div>
+                  <div className="metric-item">
+                    <FaEnvelope /> <span>Total Messages</span>
+                    <strong>{listingMetrics.messages}</strong>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Seller Information */}
@@ -117,7 +205,7 @@ const ProductDetail = () => {
             <div className="seller-profile">
               <img
                 src={`http://127.0.0.1:8000${product.user?.profile_picture}`}
-                alt={product.seller?.name}
+                alt={product.user?.name}
                 className="seller-avatar"
               />
               <div className="seller-details">
