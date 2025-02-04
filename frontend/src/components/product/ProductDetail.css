@@ -247,6 +247,59 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
   
+  .listing-metrics {
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    margin-bottom: 20px;
+
+  }
+  
+  .metrics-grid {
+    display: flex;
+    gap: 40px; /* Space between metric items */
+  }
+  
+  .metric-item {
+    display: flex;
+    align-items: center; /* Align icon and text in one line */
+    gap: 12px;/* Space between icon and text */
+    color: #38528F;
+  }
+  
+  .metric-icon-wrapper {
+    width: 45px; /* Adjust the width */
+    height: 45px; /* Adjust the height */
+    background-color: #ebeef5; /* Background color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+     /* Make it circular */
+  }
+  
+  .metric-icon {
+    font-size: 20px; /* Adjust icon size */
+    color: #38528F;
+  }
+  
+  .metric-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .metric-content strong {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .metric-content span {
+    font-size: 14px;
+    color: #666;
+  }
+  
+
   @media (max-width: 1024px) {
     .product-main {
       flex-direction: column;

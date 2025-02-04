@@ -136,6 +136,7 @@ const ProductDetail = () => {
             <div className="product-price">Rs {product.price.toLocaleString()}</div>
 
             {/* Meta Information */}
+            {!isAdOwner && (
             <div className="product-meta">
               <div className="meta-top">
                 <div className="location">
@@ -154,16 +155,54 @@ const ProductDetail = () => {
                 <span>Posted {product.created_at}</span>
               </div>
             </div>
+            )}
 
+
+
+            {/* Listing Metrics for Ad Owner */}
+            {isAdOwner && (
+              <div className="listing-metrics">
+                <div className="metrics-grid">
+                  <div className="metric-item">
+                    <div className="metric-icon-wrapper">
+                      <FaEye className="metric-icon" />
+                    </div>
+                    <div className="metric-content">
+                      <strong>{listingMetrics.views}</strong>
+                      <span>Views</span>
+                    </div>
+                  </div>
+                  <div className="metric-item">
+                    <div className="metric-icon-wrapper">
+                      <FaHandshake className="metric-icon" />
+                    </div>
+                    <div className="metric-content">
+                      <strong>{listingMetrics.offers}</strong>
+                      <span>Offers</span>
+                    </div>
+                  </div>
+                  <div className="metric-item">
+                    <div className="metric-icon-wrapper">
+                      <FaEnvelope className="metric-icon" />
+                    </div>
+                    <div className="metric-content">
+                      <strong>{listingMetrics.messages}</strong>
+                      <span>Messages</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {/* Conditional Action Buttons */}
             <div className="action-buttons">
               {isAdOwner ? (
                 <>
-                  <button className="edit-btn" onClick={handleEditListing}>
-                    <FaEdit /> Edit Listing
-                  </button>
-                  <button className="feature-btn" onClick={handleFeatureListing}>
+                  <button className="message-btn feature-btn" onClick={handleFeatureListing}>
                     <FaStar /> Feature This Listing
+                  </button>
+                  <button className="offer-btn edit-btn" onClick={handleEditListing}>
+                    <FaEdit /> Edit Listing
                   </button>
                 </>
               ) : (
@@ -177,27 +216,6 @@ const ProductDetail = () => {
                 </>
               )}
             </div>
-
-            {/* Listing Metrics for Ad Owner */}
-            {isAdOwner && (
-              <div className="listing-metrics">
-                <h3>Your Listing Performance</h3>
-                <div className="metrics-grid">
-                  <div className="metric-item">
-                    <FaEye /> <span>Total Views</span>
-                    <strong>{listingMetrics.views}</strong>
-                  </div>
-                  <div className="metric-item">
-                    <FaHandshake /> <span>Total Offers</span>
-                    <strong>{listingMetrics.offers}</strong>
-                  </div>
-                  <div className="metric-item">
-                    <FaEnvelope /> <span>Total Messages</span>
-                    <strong>{listingMetrics.messages}</strong>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Seller Information */}
