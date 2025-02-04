@@ -57,7 +57,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'title', 'price', 'location', 'description', 'images', 'user','created_at']  # Include location here
+        fields = ['id', 'title', 'contact_phone', 'price', 'location', 'description', 'images', 'user','created_at']  # Include location here
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

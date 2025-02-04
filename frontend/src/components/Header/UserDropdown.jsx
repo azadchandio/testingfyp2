@@ -14,10 +14,11 @@ const UserDropdown = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth(); // Get user from AuthContext
 
-  // Get user data from context or localStorage
-  const userData = user || JSON.parse(localStorage.getItem('user')) || {
-    name: 'Guest User',
-    avatar: profile
+  // Improved user data handling
+  const userData = {
+    name: user?.name || localStorage.getItem('userName') || 'Guest User',
+    avatar: user?.avatar || localStorage.getItem('userAvatar') || profile,
+    email: user?.email || localStorage.getItem('userEmail') || ''
   };
 
   // Add useEffect to fetch unread counts
@@ -99,11 +100,16 @@ const UserDropdown = ({ isOpen, onClose }) => {
         {/* User Info Section */}
         <div className="user-info">
           <div className="avatar">
-            <img src={userData.avatar || profile} alt={userData.username || 'User'} />
+            <img 
+              src={userData.avatar} 
+              alt={userData.name} 
+              onError={(e) => { e.target.src = profile; }} // Fallback to default profile if image fails
+            />
           </div>
           <div className="user-details">
             <p className="greeting">Hi, Welcome</p>
-            <h3 className="username">{userData.username || 'Guest User'}</h3>
+            <h3 className="username">{userData.name}</h3>
+            <p className="user-email">{userData.email}</p>
           </div>
         </div>
 
@@ -131,18 +137,9 @@ const UserDropdown = ({ isOpen, onClose }) => {
   );
 };
 
-const menuItemShape = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  icon: PropTypes.element.isRequired,
-  action: PropTypes.func.isRequired,
-  badge: PropTypes.number
-});
-
 UserDropdown.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  menuItems: PropTypes.arrayOf(menuItemShape)
+  onClose: PropTypes.func.isRequired
 };
 
-export default UserDropdown; 
+export default UserDropdown;

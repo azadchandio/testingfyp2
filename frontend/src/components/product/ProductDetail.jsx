@@ -4,21 +4,21 @@ import { FaMapMarkerAlt, FaClock, FaBookmark } from "react-icons/fa";
 import { LuMessageSquareMore } from "react-icons/lu";
 import { CiDollar } from "react-icons/ci";
 import { FaGreaterThan } from "react-icons/fa6";
-import axios from "axios";
+import { advertisementService } from "../../services/advertisement.service"; // Importing the service
 import "./ProductDetail.css";
 
 const ProductDetail = () => {
-  const { id } = useParams(); // Get the product ID from the URL
-  const [product, setProduct] = useState(null); // State to hold product data
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState(null); // Error state
-  const [currentImageIndex, setCurrentImageIndex] = useState(0); // Carousel image index
+  const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/advertisements/${id}/`);
-        setProduct(response.data);
+        const data = await advertisementService.getAdvertisement(id);
+        setProduct(data);
         setLoading(false);
       } catch (err) {
         setError("Failed to load product details. Please try again.");
@@ -32,7 +32,7 @@ const ProductDetail = () => {
   if (loading) return <div>Loading product details...</div>;
   if (error) return <div>{error}</div>;
 
-  // Handlers for carousel navigation
+  // Handlers for image carousel
   const handlePrevImage = () => {
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
@@ -123,7 +123,7 @@ const ProductDetail = () => {
               <div className="seller-details">
                 <p className="section-label">Listing Posted By</p>
                 <h3 className="seller-name">{product.user?.name}</h3>
-                <p className="seller-phone">{product.user?.phone_number}</p>
+                <p className="seller-phone">{product.user?.contact_phone}</p>
               </div>
             </div>
           </div>
