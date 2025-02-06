@@ -57,24 +57,24 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'title', 'contact_phone', 'price', 'location', 'description', 'images', 'user','created_at']  # Include location here
+        fields = ['id', 'title', 'contact_phone', 'price', 'location', 'description', 'images', 'user','created_at','condition', 'category', 'subcategory','brand', 'model', 'year','show_phone']  # Include location here
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name', 'slug', 'icon']
+        fields = ['id', 'name', 'slug', 'icon', 'order', 'is_active']
 
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = SubCategory
-        fields = ['name', 'slug']
+        fields = ['id', 'name', 'slug', 'is_active', 'category']
 
 class CategoryDetailSerializer(serializers.ModelSerializer):
     subcategories = SubCategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = Category
-        fields = ['name', 'slug', 'icon', 'subcategories']
+        fields = ['id','name', 'slug', 'icon', 'subcategories']
 
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:

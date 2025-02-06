@@ -10,10 +10,13 @@ class Useradmin(admin.ModelAdmin):
 admin.site.register(User,Useradmin)
 
 class CategoryAdmin(admin.ModelAdmin):
-    list_display=('name','slug')
+    list_display=('name', 'icon', 'order', 'is_active')
 admin.site.register(Category,CategoryAdmin)
 
-admin.site.register(SubCategory)
+class subCategoryAdmin(admin.ModelAdmin):
+    list_display=('name','slug','is_active')
+admin.site.register(SubCategory,subCategoryAdmin)
+
 admin.site.register(Location)
 
 class Add(admin.ModelAdmin):

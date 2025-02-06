@@ -12,14 +12,19 @@ router.register(r'chats', ChatViewSet, basename='chat')
 router.register(r'notifications', NotificationViewSet, basename='notification')
 
 urlpatterns = [
+    
     path('advertisements/', AdvertisementListView, name='advertisements'),
     path('advertisements/<int:pk>/', GetAdvertismenet, name='advertisement'),
+
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
     path('profile/', views.get_user_profile, name='profile'),
     path('kyc/approve/<int:kyc_id>/', views.approve_kyc, name='approve_kyc'),
+
     path('categories/', views.CategoryListView.as_view(), name='categories'),
     path('categories/<slug:slug>/', views.CategoryDetailView.as_view(), name='category-detail'),
+    path('categories/<slug:slug>/subcategories/', views.SubCategoryListView.as_view(), name='subcategory-list'),
+    
     path('advertisements/featured/', views.FeaturedAdvertisementsView.as_view(), name='featured-ads'),
     path('advertisements/search/', views.SearchAdvertisementsView.as_view(), name='search-ads'),
     path('advertisements/<int:pk>/report/', views.ReportAdvertisementView.as_view(), name='report-ad'),

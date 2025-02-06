@@ -1,10 +1,18 @@
 import api from './api';
 
+import axios from 'axios';
+const API_URL = 'http://127.0.0.1:8000/api/advertisements/';
+
 export const advertisementService = {
     getAllAdvertisements: async () => {
-        const response = await api.get('/advertisements/');
-        return response.data;
-    },
+        try {
+          const response = await axios.get(API_URL);
+          return response.data;
+        } catch (error) {
+          console.error('Error fetching advertisements:', error);
+          return [];
+        }
+      },
 
     getAdvertisement: async (id) => {
         const response = await api.get(`/advertisements/${id}/`);

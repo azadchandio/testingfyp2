@@ -1,8 +1,7 @@
 // import React from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import PropTypes from 'prop-types'
-
 import Login from './components/Auth/LoginPage'
 import Register from './components/Auth/RegistrationPage'
 import ForgetPassword from './components/Auth/ForgetPassword'
@@ -112,7 +111,7 @@ const App = () => {
 
               {/* Public Routes */}
               <Route path="/terms" element={<Terms />} />
-              <Route path="/listing/subcategory/:categoryId" element={<SubCategory />} />
+              <Route path="/listing/subcategory/:slug" element={<SubCategory />} />
               <Route path="/listing/details/:categoryId/:subCategoryId" element={<ListingDetails />} />
             </Routes>
           </main>

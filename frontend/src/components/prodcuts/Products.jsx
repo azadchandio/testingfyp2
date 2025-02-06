@@ -1,98 +1,72 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBookmark, faLocationDot, faClock } from '@fortawesome/free-solid-svg-icons';
 import './Products.css';
 import { useNavigate } from 'react-router-dom';
+import { advertisementService } from '../../services/advertisement.service';
 
-// Format time function outside of the component
 const formatTime = (dateString) => {
   const postDate = new Date(dateString);
   const currentDate = new Date();
-  const timeDifference = currentDate - postDate; // in milliseconds
-
-  // 1 minute = 60 seconds * 1000 milliseconds
+  const timeDifference = currentDate - postDate;
   const oneMinute = 60 * 1000;
   const oneHour = 60 * 60 * 1000;
   const oneDay = 24 * oneHour;
 
-  if (timeDifference < oneMinute) {
-    return "Just now"; // If posted less than 1 minute ago
-  } else if (timeDifference < oneHour) {
-    // Show time in minutes (if within the last hour)
-    const minutesAgo = Math.floor(timeDifference / oneMinute);
-    return `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ago`;
-  } else if (timeDifference < oneDay) {
-    // Show time in hours (if within the last 24 hours)
-    const hoursAgo = Math.floor(timeDifference / oneHour);
-    return `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ago`;
-  } else {
-    // Show the full date (if older than 24 hours)
-    const daysAgo = Math.floor(timeDifference / oneDay);
-    if (daysAgo === 1) {
-      return `1 day ago`;
-    } else {
-      return `${daysAgo} days ago`;
-    }
-  }
+  if (timeDifference < oneMinute) return "Just now";
+  if (timeDifference < oneHour) return `${Math.floor(timeDifference / oneMinute)} min ago`;
+  if (timeDifference < oneDay) return `${Math.floor(timeDifference / oneHour)} hr ago`;
+  return `${Math.floor(timeDifference / oneDay)} days ago`;
 };
 
 const ProductCard = ({ product }) => {
-  const formatPrice = (price) => {
-    return `Rs ${price.toLocaleString()}`;
-  };
+  const navigate = useNavigate();
+  
+  if (!product) return null; // Prevent rendering if product is undefined
 
-  const [formattedTime, setFormattedTime] = useState(formatTime(product.created_at)); // State for formatted time
+  const [formattedTime, setFormattedTime] = useState(formatTime(product.created_at || new Date()));
 
-  // Update the formatted time every minute
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setFormattedTime(formatTime(product.created_at)); // Update the time every minute
-    }, 60000); // Update every 60 seconds (1 minute)
-
-    // Cleanup the interval on component unmount
+      setFormattedTime(formatTime(product.created_at || new Date()));
+    }, 60000);
     return () => clearInterval(intervalId);
   }, [product.created_at]);
 
-  const navigate = useNavigate();
-  let count = 1;
-
-  const goToProductScreen = () => {
-    navigate(`/product/${product.id}`);
-  };
-
   return (
-    <div className="product-card" onClick={goToProductScreen}>
+    <div className="product-card" onClick={() => navigate(`/product/${product.id}`)}>
       <div className="image-container">
-        <img
-          src={`http://127.0.0.1:8000${product.image[0].image_url}`} // Use the image_url from the API response
-          alt={product.title}
-          className="product-image"
+        <img 
+          src={product.images && product.images.length > 0 ? `http://127.0.0.1:8000${product.images[0].image_url}` : '/default-image.jpg'} 
+          alt={product.title} 
+          className="product-image" 
         />
       </div>
-
       <div className="content">
-        <div className="price">{formatPrice(product.price)}</div>
-        <h3 className="title">{product.title}</h3>
+        <div className="price">Rs {product.price ? product.price.toLocaleString() : 'N/A'}</div>
+        <h3 className="title">{product.title || 'No Title'}</h3>
         <div className="info">
           <div className="location">
             <FontAwesomeIcon icon={faLocationDot} />
-            {/* Render the location details */}
-            <span>{product.location?.city}, {product.location?.state}, {product.location?.country}</span>
+            <span>
+              {product.location?.city || 'Unknown City'}, 
+              {product.location?.state || 'Unknown State'}, 
+              {product.location?.country || 'Unknown Country'}
+            </span>
           </div>
           <div className="time">
             <FontAwesomeIcon icon={faClock} />
-            <span>{formattedTime}</span> {/* Use the formatted time */}
+            <span>{formattedTime}</span>
           </div>
         </div>
       </div>
-
       <button className="bookmark-button">
         <FontAwesomeIcon icon={faBookmark} className="bookmark-icon" />
       </button>
     </div>
   );
 };
+
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -101,31 +75,26 @@ const Products = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/api/advertisements/');
-        setProducts(response.data);
-        setLoading(false);
+        const data = await advertisementService.getAllAdvertisements();
+        console.log('Fetched Products:', data); // Debugging line
+        setProducts(data);
       } catch (error) {
         console.log('Error fetching advertisements:', error);
+      } finally {
         setLoading(false);
       }
     };
     fetchProducts();
   }, []);
+  
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="products-container">
-      <h2 className="products-title">
-        Latest Products<span className="title-dot">.</span>
-      </h2>
-
+      <h2 className="products-title">Latest Products<span className="title-dot">.</span></h2>
       <div className="products-grid">
-        {products.map((product) => (
-          <ProductCard key={product.id} product={product} />
-        ))}
+        {products.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
     </div>
   );

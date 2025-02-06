@@ -13,8 +13,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated,IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, RegisterSerializer
-from .models import User, Advertisement, KYC, Category, Offer, ChatRoom, Notification, Favorite, ChatMessage
-from .serializers import AdvertisementSerializer, CategorySerializer, CategoryDetailSerializer, OfferSerializer, ChatMessageSerializer, NotificationSerializer
+from .models import User, Advertisement, KYC, Category,SubCategory, Offer, ChatRoom, Notification, Favorite, ChatMessage
+from .serializers import AdvertisementSerializer, CategorySerializer, SubCategorySerializer, CategoryDetailSerializer, OfferSerializer, ChatMessageSerializer, NotificationSerializer
 from rest_framework import generics, filters, viewsets
 from rest_framework.views import APIView
 from .serializers import ReportSerializer
@@ -118,6 +118,13 @@ class CategoryDetailView(generics.RetrieveAPIView):
     serializer_class = CategoryDetailSerializer
     lookup_field = 'slug'
 
+class SubCategoryListView(generics.ListAPIView):
+    serializer_class = SubCategorySerializer
+
+    def get_queryset(self):
+        category_slug = self.kwargs['slug']
+        return SubCategory.objects.filter(category__slug=category_slug, is_active=True)
+    
 class FeaturedAdvertisementsView(generics.ListAPIView):
     serializer_class = AdvertisementSerializer
 

@@ -9,7 +9,10 @@ const AdvertisementCard = ({ advertisement }) => {
             <Link to={`/product/${advertisement.id}`}>
                 <div className="product-image">
                     {advertisement.images && advertisement.images.length > 0 ? (
-                        <img src={advertisement.images[0].image_url} alt={advertisement.title} />
+                        <img 
+                            src={`http://127.0.0.1:8000${advertisement.images[0].image_url}`} 
+                            alt={advertisement.title} 
+                        />
                     ) : (
                         <div className="no-image">No Image</div>
                     )}
@@ -56,4 +59,4 @@ AdvertisementCard.propTypes = {
     }).isRequired
 };
 
-export default AdvertisementCard; 
+export default AdvertisementCard;
