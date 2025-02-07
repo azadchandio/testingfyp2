@@ -32,6 +32,23 @@ def GetAdvertismenet(request,pk):
     return Response(serializer.data)
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_advertisement(request):
+    try:
+        serializer = AdvertisementSerializer(data=request.data, context={'request': request})  # ✅ Pass context
+        if serializer.is_valid():
+            print(f"Authenticated User: {request.user}")
+            serializer.save(user=request.user)  # Assign logged-in user
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            print(serializer.errors)  # Debugging line
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        print(f"Error: {e}")  # Debugging line
+        return Response({"error": "Something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
     serializer = RegisterSerializer(data=request.data)

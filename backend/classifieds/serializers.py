@@ -52,13 +52,34 @@ class LocationSerializer(serializers.ModelSerializer):
 # AdvertisementSerializer with LocationSerializer
 class AdvertisementSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)
-    user = UserSerializer(read_only=True)  # Add this line to include user details
-    location = LocationSerializer(read_only=True)  # Add this line to serialize the location
+    user = UserSerializer(read_only=True)
+    location = LocationSerializer(read_only=True)  
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'title', 'contact_phone', 'price', 'location', 'description', 'images', 'user','created_at','condition', 'category', 'subcategory','brand', 'model', 'year','show_phone']  # Include location here
+        fields = ['id', 'title', 'description', 'price', 'category', 'subcategory', 'location', 'condition', 'featured', 'user', 'images','created_at']
 
+    def create(self, validated_data):
+        request = self.context.get('request')
+        if not request:
+            raise serializers.ValidationError({"error": "Request context is missing"})
+
+        # Extract location from request.data
+        location_data = request.data.get("location")
+        
+        if not location_data or not isinstance(location_data, dict):  
+            raise serializers.ValidationError({"error": "Location must be a valid dictionary"})
+
+        # Ensure location exists or create it
+        location_instance, created = Location.objects.get_or_create(**location_data)
+
+        # Assign user and location
+        validated_data['user'] = request.user
+        validated_data['location'] = location_instance  
+
+        return Advertisement.objects.create(**validated_data)
+
+    
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

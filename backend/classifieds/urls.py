@@ -15,6 +15,7 @@ urlpatterns = [
     
     path('advertisements/', AdvertisementListView, name='advertisements'),
     path('advertisements/<int:pk>/', GetAdvertismenet, name='advertisement'),
+    path('advertisements/create/', views.create_advertisement, name='create-advertisement'),
 
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
@@ -28,6 +29,7 @@ urlpatterns = [
     path('advertisements/featured/', views.FeaturedAdvertisementsView.as_view(), name='featured-ads'),
     path('advertisements/search/', views.SearchAdvertisementsView.as_view(), name='search-ads'),
     path('advertisements/<int:pk>/report/', views.ReportAdvertisementView.as_view(), name='report-ad'),
+
     path('user/dashboard/', views.UserDashboardView.as_view(), name='user-dashboard'),
     path('', include(router.urls)),
     path('advertisements/<int:pk>/make-offer/', views.make_offer, name='make-offer'),
