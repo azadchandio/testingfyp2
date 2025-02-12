@@ -6,6 +6,7 @@ import { CiDollar } from "react-icons/ci";
 import { FaGreaterThan } from "react-icons/fa6";
 import { useAuth } from "../../context/AuthContext";
 import { advertisementService } from "../../services/advertisement.service";
+import { messageService } from "../../services/message.service";
 import "./ProductDetail.css";
 
 const ProductDetail = () => {
@@ -14,42 +15,38 @@ const ProductDetail = () => {
   const { user, isAuthenticated } = useAuth();
   
   const [product, setProduct] = useState(null);
+  const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [message, setMessage] = useState("");
   
-  // New state for additional listing metrics
-  const [listingMetrics, setListingMetrics] = useState({
-    views: 0,
-    offers: 0,
-    messages: 0
-  });
-
   useEffect(() => {
-    const fetchProductDetails = async () => {
+    const fetchData = async () => {
       try {
-        const data = await advertisementService.getAdvertisement(id);
-        setProduct(data);
-
-        // Fetch listing metrics only if the current user is the ad owner
-        if (isAuthenticated && user?.id === data.user?.id) {
-          try {
-            const metrics = await advertisementService.getListingMetrics(id);
-            setListingMetrics(metrics);
-          } catch (metricsError) {
-            console.error("Failed to fetch listing metrics:", metricsError);
-          }
-        }
-
+        setLoading(true);
+        // Fetch product details
+        const productData = await advertisementService.getAdvertisement(id);
+        setProduct(productData);
         setLoading(false);
+
+        // Fetch metrics separately - if it fails, it won't affect product display
+        try {
+          const metricsData = await advertisementService.getListingMetrics(id);
+          setMetrics(metricsData);
+        } catch (metricsError) {
+          console.log('Metrics not available:', metricsError);
+          // Don't set error state - just continue without metrics
+        }
       } catch (err) {
-        setError("Failed to load product details. Please try again.");
+        setError("Product not found");
         setLoading(false);
       }
     };
 
-    fetchProductDetails();
-  }, [id, isAuthenticated, user]);
+    fetchData();
+  }, [id]);
 
   // Handlers for image carousel
   const handlePrevImage = () => {
@@ -68,7 +65,8 @@ const ProductDetail = () => {
 
   // New method to handle edit listing
   const handleEditListing = () => {
-    navigate(`/edit-listing/${id}`);
+    // Navigate to ListingDetails with edit mode
+    navigate(`/listing/details/${product.category_id}/${product.subcategory_id}?edit=${id}`);
   };
 
   // New method to feature listing
@@ -93,11 +91,161 @@ const ProductDetail = () => {
     navigate(`/send-offer/${id}`);
   };
 
-  if (loading) return <div>Loading product details...</div>;
-  if (error) return <div>{error}</div>;
+  const handleMessageSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      navigate('/login');
+      return;
+    }
 
-  // Check if current user is the ad owner
-  const isAdOwner = isAuthenticated && user?.id === product.user?.id;
+    try {
+      await messageService.startChat(product.id, message);
+      setMessage("");
+      setShowMessageModal(false);
+      // Show success notification
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  };
+
+  // Move isAdOwner check into a function to handle null cases safely
+  const checkIsAdOwner = () => {
+    if (!user || !product || !product.user) return false;
+    return isAuthenticated && user.id === product.user.id;
+  };
+
+  // Separate buttons for owner and non-owner with null checks
+  const renderActionButtons = () => {
+    if (!product) return null; // Don't render buttons if product isn't loaded
+
+    if (!user) {
+      // Not logged in - show message button that redirects to login
+      return (
+        <button 
+          className="message-button"
+          onClick={() => navigate('/login')}
+        >
+          <FaEnvelope /> Message Seller
+        </button>
+      );
+    }
+
+    if (checkIsAdOwner()) {
+      // Owner sees edit button
+      return (
+        <div className="owner-actions">
+          <button 
+            className="edit-button"
+            onClick={() => navigate(`/listing/edit/${product.id}`)}
+          >
+            <FaEdit /> Edit Listing
+          </button>
+          <button 
+            className="feature-button"
+            onClick={handleFeatureListing}
+          >
+            <FaStar /> Feature Listing
+          </button>
+        </div>
+      );
+    }
+
+    // Logged in non-owner sees message and offer buttons
+    return (
+      <div className="buyer-actions">
+        <button 
+          className="message-button"
+          onClick={() => setShowMessageModal(true)}
+        >
+          <FaEnvelope /> Message Seller
+        </button>
+        <button 
+          className="offer-button"
+          onClick={handleSendOffer}
+        >
+          <CiDollar /> Make Offer
+        </button>
+      </div>
+    );
+  };
+
+  // Render seller info with null checks
+  const renderSellerInfo = () => {
+    if (!product || !product.user) return null;
+
+    return (
+      <div className="seller-info">
+        <div className="seller-profile">
+          <img
+            src={product.user.profile_picture 
+              ? `http://127.0.0.1:8000${product.user.profile_picture}`
+              : '/default-avatar.png'} // Add a default avatar image
+            alt={product.user.name || 'Seller'}
+            className="seller-avatar"
+          />
+          <div className="seller-details">
+            <p className="section-label">Listing Posted By</p>
+            <h3 className="seller-name">{product.user.name || 'Anonymous'}</h3>
+            {product.user.contact_phone && (
+              <p className="seller-phone">{product.user.contact_phone}</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const MessageModal = () => (
+    <div className={`message-modal ${showMessageModal ? 'show' : ''}`}>
+      <div className="message-modal-content">
+        <h3>Message to Seller</h3>
+        <form onSubmit={handleMessageSubmit}>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Write your message..."
+            required
+          />
+          <div className="modal-buttons">
+            <button type="submit">Send Message</button>
+            <button type="button" onClick={() => setShowMessageModal(false)}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-container">
+        <h2>{error}</h2>
+        <Link to="/" className="back-to-home">
+          Back to Home
+        </Link>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="not-found-container">
+        <h2>Product not found</h2>
+        <Link to="/" className="back-to-home">
+          Back to Home
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="product-detail-wrapper">
@@ -107,140 +255,110 @@ const ProductDetail = () => {
         <span className="separator">
           <FaGreaterThan />
         </span>
-        <span className="current">{product.title}</span>
+        <span className="current">{product?.title || 'Loading...'}</span>
       </div>
 
       {/* Product Detail Container */}
-      <div className="product-detail-container">
-        {/* Main Content */}
-        <div className="product-main">
-          {/* Image Carousel */}
-          <div className="product-image-detail">
-            <button className="prev-button" onClick={handlePrevImage}>
-              {"<"}
-            </button>
-            {product.images?.length > 0 && (
-              <img
-                src={`http://127.0.0.1:8000${product.images[currentImageIndex]?.image_url}`}
-                alt={`${product.title} - ${currentImageIndex + 1}`}
-              />
-            )}
-            <button className="next-button" onClick={handleNextImage}>
-              {">"}
-            </button>
-          </div>
-
-          {/* Product Info */}
-          <div className="product-info">
-            <h1 className="product-title">{product.title}</h1>
-            <div className="product-price">Rs {product.price.toLocaleString()}</div>
-
-            {/* Meta Information */}
-            {!isAdOwner && (
-            <div className="product-meta">
-              <div className="meta-top">
-                <div className="location">
-                  <FaMapMarkerAlt />
-                  <span>
-                    {product.location?.city}, {product.location?.state},{" "}
-                    {product.location?.country}
-                  </span>
-                </div>
-                <button className="save-button">
-                  <FaBookmark />
-                </button>
-              </div>
-              <div className="posted-time">
-                <FaClock />
-                <span>Posted {product.created_at}</span>
-              </div>
-            </div>
-            )}
-
-
-
-            {/* Listing Metrics for Ad Owner */}
-            {isAdOwner && (
-              <div className="listing-metrics">
-                <div className="metrics-grid">
-                  <div className="metric-item">
-                    <div className="metric-icon-wrapper">
-                      <FaEye className="metric-icon" />
-                    </div>
-                    <div className="metric-content">
-                      <strong>{listingMetrics.views}</strong>
-                      <span>Views</span>
-                    </div>
-                  </div>
-                  <div className="metric-item">
-                    <div className="metric-icon-wrapper">
-                      <FaHandshake className="metric-icon" />
-                    </div>
-                    <div className="metric-content">
-                      <strong>{listingMetrics.offers}</strong>
-                      <span>Offers</span>
-                    </div>
-                  </div>
-                  <div className="metric-item">
-                    <div className="metric-icon-wrapper">
-                      <FaEnvelope className="metric-icon" />
-                    </div>
-                    <div className="metric-content">
-                      <strong>{listingMetrics.messages}</strong>
-                      <span>Messages</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {/* Conditional Action Buttons */}
-            <div className="action-buttons">
-              {isAdOwner ? (
+      {product && (
+        <div className="product-detail-container">
+          <div className="product-main">
+            {/* Image Carousel */}
+            <div className="product-image-detail">
+              {product.images?.length > 0 ? (
                 <>
-                  <button className="message-btn feature-btn" onClick={handleFeatureListing}>
-                    <FaStar /> Feature This Listing
-                  </button>
-                  <button className="offer-btn edit-btn" onClick={handleEditListing}>
-                    <FaEdit /> Edit Listing
-                  </button>
+                  <button className="prev-button" onClick={handlePrevImage}>{"<"}</button>
+                  <img
+                    src={`http://127.0.0.1:8000${product.images[currentImageIndex]?.image_url}`}
+                    alt={`${product.title} - ${currentImageIndex + 1}`}
+                  />
+                  <button className="next-button" onClick={handleNextImage}>{">"}</button>
                 </>
               ) : (
-                <>
-                  <button className="message-btn" onClick={handleSendMessage}>
-                    <LuMessageSquareMore /> Message Now
-                  </button>
-                  <button className="offer-btn" onClick={handleSendOffer}>
-                    <CiDollar /> Send an Offer
-                  </button>
-                </>
+                <div className="no-image">No images available</div>
               )}
             </div>
-          </div>
 
-          {/* Seller Information */}
-          <div className="seller-info">
-            <div className="seller-profile">
-              <img
-                src={`http://127.0.0.1:8000${product.user?.profile_picture}`}
-                alt={product.user?.name}
-                className="seller-avatar"
-              />
-              <div className="seller-details">
-                <p className="section-label">Listing Posted By</p>
-                <h3 className="seller-name">{product.user?.name}</h3>
-                <p className="seller-phone">{product.user?.contact_phone}</p>
+            {/* Product Info */}
+            <div className="product-info">
+              <h1 className="product-title">{product.title}</h1>
+              <div className="product-price">
+                Rs {product.price?.toLocaleString() || '0'}
+              </div>
+
+              {/* Meta Information */}
+              {!checkIsAdOwner() && (
+                <div className="product-meta">
+                  <div className="meta-top">
+                    <div className="location">
+                      <FaMapMarkerAlt />
+                      <span>
+                        {product.location?.city || 'N/A'}, 
+                        {product.location?.state || 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="posted-time">
+                    <FaClock />
+                    <span>Posted {new Date(product.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Listing Metrics for Ad Owner */}
+              {checkIsAdOwner() && (
+                <div className="listing-metrics">
+                  <div className="metrics-grid">
+                    <div className="metric-item">
+                      <div className="metric-icon-wrapper">
+                        <FaEye className="metric-icon" />
+                      </div>
+                      <div className="metric-content">
+                        <strong>{metrics?.views || 0}</strong>
+                        <span>Views</span>
+                      </div>
+                    </div>
+                    <div className="metric-item">
+                      <div className="metric-icon-wrapper">
+                        <FaHandshake className="metric-icon" />
+                      </div>
+                      <div className="metric-content">
+                        <strong>{metrics?.offers || 0}</strong>
+                        <span>Offers</span>
+                      </div>
+                    </div>
+                    <div className="metric-item">
+                      <div className="metric-icon-wrapper">
+                        <FaEnvelope className="metric-icon" />
+                      </div>
+                      <div className="metric-content">
+                        <strong>{metrics?.messages || 0}</strong>
+                        <span>Messages</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="action-buttons">
+                {renderActionButtons()}
               </div>
             </div>
-          </div>
 
-          {/* Product Description */}
-          <div className="product-description">
-            <h2 className="section-title">Description</h2>
-            <p className="description-text">{product.description}</p>
+            {/* Seller Information */}
+            {renderSellerInfo()}
+
+            {/* Product Description */}
+            <div className="product-description">
+              <h2 className="section-title">Description</h2>
+              <p className="description-text">{product.description}</p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Message Modal */}
+      {showMessageModal && <MessageModal />}
     </div>
   );
 };

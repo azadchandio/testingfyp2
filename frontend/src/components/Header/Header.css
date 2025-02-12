@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700&display=swap');
 .header {
   background-color: #3B5998;
   box-shadow: -1px 9px 9px -2px rgba(0,0,0,0.82);
@@ -16,10 +17,11 @@
   justify-content: space-between;
 }
 
-.logo {
+.logo-header {
+  font-family: 'Bricolage Grotesque', sans-serif;
   color: white;
-  font-size: 48px;
-  /* font-weight: bold; */
+  font-size: 58px;
+  cursor: pointer;
 }
 
 .logo-dot {
@@ -33,41 +35,16 @@
 }
 
 .icon {
+  border: 1px solid rgba(255, 255, 255, 0.3);
   color: white;
   font-size: 1.25rem;
-  border: 1px solid white;
-  border-radius: 50%;
+  border-radius: 40%;
   padding: 0.5rem;
   cursor: pointer;
 }
 
 .icon:hover {
-  opacity: 0.8;
-}
-
-.button {
-  padding: 0.5rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.2s;
-}
-
-.button-primary {
-  background-color: white;
-  color: #3B5998;
-}
-
-.button-primary:hover {
-  background-color: #f3f4f6;
-}
-
-.button-secondary {
-  border: 1px solid white;
-  color: white;
-}
-
-.button-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .user-section {
@@ -89,3 +66,22 @@
 .account-button:hover {
   background: rgba(255, 255, 255, 0.1);
 } 
+.sell_now_btn, .register_btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+}
+
+.sell_now_btn:hover{
+  background: rgba(255, 255, 255, 0.1);
+}
+.register_btn:hover{
+  background: rgba(255, 255, 255, 0.1);
+}

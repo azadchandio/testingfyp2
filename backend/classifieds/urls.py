@@ -39,4 +39,11 @@ urlpatterns = [
     path('messages/unread/count/', views.get_unread_messages_count, name='unread-messages-count'),
     path('notifications/unread/count/', views.get_unread_notifications_count, name='unread-notifications-count'),
     path('advertisements/<int:pk>/stats/', views.get_advertisement_stats, name='advertisement-stats'),
+    path('advertisements/<int:pk>/metrics/', views.get_advertisement_metrics, name='advertisement-metrics'),
+    path('advertisements/<int:pk>/listing-metrics/', views.get_listing_metrics, name='listing-metrics'),
+    path('chats/', views.ChatViewSet.as_view({'get': 'list'}), name='chat-list'),
+    path('chats/<int:pk>/messages/', views.ChatViewSet.as_view({
+        'get': 'messages',
+        'post': 'send_message'
+    }), name='chat-messages'),
 ]

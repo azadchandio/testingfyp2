@@ -53,31 +53,60 @@ class LocationSerializer(serializers.ModelSerializer):
 class AdvertisementSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)
     user = UserSerializer(read_only=True)
-    location = LocationSerializer(read_only=True)  
+    location = LocationSerializer()
+    metrics = serializers.SerializerMethodField()
+    listing_metrics = serializers.SerializerMethodField()
 
     class Meta:
         model = Advertisement
-        fields = ['id', 'title', 'description', 'price', 'category', 'subcategory', 'location', 'condition', 'featured', 'user', 'images','created_at']
+        fields = [
+            'id', 'title', 'description', 'price', 
+            'category', 'subcategory', 'location', 
+            'condition', 'brand', 'tags', 'featured',
+            'status', 'user', 'images', 'created_at',
+            'updated_at', 'metrics', 'listing_metrics',
+            'show_phone', 'contact_phone', 'allow_offers',
+            'negotiable', 'model', 'year'
+        ]
+        read_only_fields = [
+            'views_count', 'messages_count', 
+            'offers_count', 'saved_count'
+        ]
 
-    def create(self, validated_data):
+    def get_metrics(self, obj):
         request = self.context.get('request')
-        if not request:
-            raise serializers.ValidationError({"error": "Request context is missing"})
+        # Only return metrics if the requester is authenticated and is the owner
+        if request and request.user.is_authenticated and request.user == obj.user:
+            return {
+                'views': obj.views_count,
+                'messages': obj.messages_count,
+                'offers': obj.offers_count,
+                'saves': obj.saved_count
+            }
+        return None
 
-        # Extract location from request.data
-        location_data = request.data.get("location")
+    def get_listing_metrics(self, obj):
+        request = self.context.get('request')
+        if request and request.user == obj.user:
+            return {
+                'views': obj.view_count,
+                'messages': ChatRoom.objects.filter(advertisement=obj).count(),
+                'offers': Offer.objects.filter(advertisement=obj).count(),
+            }
+        return None
+
+    def update(self, instance, validated_data):
+        location_data = validated_data.pop('location', None)
         
-        if not location_data or not isinstance(location_data, dict):  
-            raise serializers.ValidationError({"error": "Location must be a valid dictionary"})
-
-        # Ensure location exists or create it
-        location_instance, created = Location.objects.get_or_create(**location_data)
-
-        # Assign user and location
-        validated_data['user'] = request.user
-        validated_data['location'] = location_instance  
-
-        return Advertisement.objects.create(**validated_data)
+        if location_data:
+            location_instance, _ = Location.objects.get_or_create(**location_data)
+            instance.location = location_instance
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
 
     
 class CategorySerializer(serializers.ModelSerializer):

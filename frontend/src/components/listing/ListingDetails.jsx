@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { FiUpload } from 'react-icons/fi';
 import Breadcrumb from '../Breadcrumb/Breadcrumb';
 import LoadingSpinner from '../LoadingSpinner/LoadingSpinner';
+import { advertisementService } from "../../services/advertisement.service";
 import './ListingDetails.css';
 
 // Categories data
@@ -38,6 +39,9 @@ const subCategoriesData = {
 const ListingDetails = () => {
   const navigate = useNavigate();
   const { categoryId, subCategoryId } = useParams();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const isEditMode = !!editId;
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
 
@@ -57,30 +61,50 @@ const ListingDetails = () => {
   });
 
   useEffect(() => {
-    const loadCategoryData = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
+        // Load category data
         if (categoryId && subCategoryId) {
           const categoryName = categories[categoryId] || '';
           const subCategories = subCategoriesData[categoryId] || [];
           const subCategory = subCategories.find(sub => sub.id === subCategoryId);
           const subCategoryName = subCategory ? subCategory.name : '';
 
-          setFormData(prev => ({
-            ...prev,
-            category: categoryName,
-            subCategory: subCategoryName
-          }));
+          // If in edit mode, fetch the existing listing data
+          if (isEditMode) {
+            const listingData = await advertisementService.getAdvertisement(editId);
+            setFormData({
+              category: categoryName,
+              subCategory: subCategoryName,
+              brand: listingData.brand || '',
+              condition: listingData.condition || '',
+              title: listingData.title || '',
+              description: listingData.description || '',
+              price: listingData.price?.toString() || '',
+              tags: listingData.tags || '',
+              phone: listingData.phone || '',
+              name: listingData.name || '',
+              showPhone: listingData.showPhone || false,
+              images: [] // We'll handle existing images separately
+            });
+          } else {
+            setFormData(prev => ({
+              ...prev,
+              category: categoryName,
+              subCategory: subCategoryName
+            }));
+          }
         }
       } catch (error) {
-        console.error('Error loading category data:', error);
+        console.error('Error loading data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadCategoryData();
-  }, [categoryId, subCategoryId]);
+    loadData();
+  }, [categoryId, subCategoryId, editId, isEditMode]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -120,18 +144,65 @@ const ListingDetails = () => {
   };
 
   const handleImageUpload = (e) => {
-    // Handle image upload logic
-    const file = e.target.files[0];
-    if (file) {
-      // Add your image upload logic here
-      console.log('Image uploaded:', file);
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        images: [...prev.images, ...files]
+      }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
-      navigate('/listing/published');
+      try {
+        const formDataToSend = new FormData();
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('price', formData.price);
+        formDataToSend.append('category', formData.category);
+        formDataToSend.append('subcategory', formData.subCategory);
+        formDataToSend.append('brand', formData.brand);
+        formDataToSend.append('condition', formData.condition);
+        formDataToSend.append('tags', formData.tags);
+        formDataToSend.append('phone', formData.phone);
+        formDataToSend.append('name', formData.name);
+        formDataToSend.append('showPhone', formData.showPhone);
+  
+        // Append location data
+        formDataToSend.append('location[city]', 'YourCity'); // Replace with actual city
+        formDataToSend.append('location[state]', 'YourState'); // Replace with actual state
+        formDataToSend.append('location[country]', 'YourCountry'); // Replace with actual country
+  
+        // Append images
+        formData.images.forEach((image, index) => {
+          formDataToSend.append(`images`, image);
+        });
+  
+        const url = isEditMode 
+          ? `/api/advertisements/${editId}/`
+          : '/api/advertisements/';
+  
+        const method = isEditMode ? 'PUT' : 'POST';
+  
+        const response = await fetch(url, {
+          method,
+          body: formDataToSend,
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+  
+        if (response.ok) {
+          navigate('/listing/published');
+        } else {
+          const errorData = await response.json();
+          console.error('Error with advertisement:', errorData);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
     }
   };
 
@@ -156,7 +227,8 @@ const ListingDetails = () => {
         </button>
 
         <h1 className="listing-heading">
-          Enter Your Listing Details<span className="dot">.</span>
+          {isEditMode ? 'Edit Your Listing' : 'Enter Your Listing Details'}
+          <span className="dot">.</span>
         </h1>
 
         <form onSubmit={handleSubmit} className="listing-form">
@@ -333,7 +405,7 @@ const ListingDetails = () => {
           </div>
 
           <button type="submit" className="publish-button">
-            Publish Now
+            {isEditMode ? 'Update Listing' : 'Publish Now'}
           </button>
         </form>
       </div>

@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext'; // Adjust the import path as needed
 import UserDropdown from './UserDropdown';
+import { FaRegCommentDots, FaBell, FaPlusCircle, FaSignInAlt } from 'react-icons/fa'; // Import React Icons
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Import FontAwesomeIcon
+import { faBookmark } from '@fortawesome/free-solid-svg-icons'; // Import Bookmark icon
 import './Header.css';
 
 const Header = () => {
@@ -21,30 +24,30 @@ const Header = () => {
       <div className="header-container">
         <div className="header-content">
           {/* Logo */}
-          <div className="logo">
-            <Link to="/" title="home">
-              logo
-            </Link>
+          <div className="logo-header" onClick={()=> navigate('/')}>
+              Auole <span className='logo-dot'>.</span>
           </div>
 
           {/* Right Side Icons and Buttons */}
           <div className="header-icons">
-            {/* Listing icon */}
-            <div className="icon">
-              <Link to="/saved-listings">listings</Link>
+            {/* Bookmark (Saved Listings) icon */}
+            <div className="icon" onClick={() => navigate('/saved-listings')}>
+              <FontAwesomeIcon icon={faBookmark} className="icon-style" /> 
             </div>
 
             {/* Message icon */}
-            <div className="icon">
-              <Link to="/messages">messages</Link>
+            <div className="icon" onClick={() => navigate('/messages')}>
+              <FaRegCommentDots className="icon-style" /> 
             </div>
 
             {/* Notification icon */}
-            <div className="icon">notification</div>
+            <div className="icon" onClick={() => navigate('/notifications')}>
+              <FaBell className="icon-style" /> 
+            </div>
 
             {/* Sell Now button */}
-            <button className="sell_now_btn">
-              <Link to="/listing/select-category">sell now</Link>
+            <button className="sell_now_btn" onClick={() => navigate('/listing/select-category')}>
+              <FaPlusCircle className="icon-style" /> Sell Now
             </button>
 
             {isAuthenticated ? (
@@ -65,11 +68,9 @@ const Header = () => {
                 />
               </div>
             ) : (
-              <button className="register_btn">
-                <Link to="/register" title="Register now">
-                  register/login
-                </Link>
-              </button>
+            <button className="register_btn" onClick={() => navigate('/register')}>
+              <FaSignInAlt className="icon-style" /> Login
+            </button>
             )}
           </div>
         </div>

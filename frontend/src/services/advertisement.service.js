@@ -15,8 +15,14 @@ export const advertisementService = {
       },
 
     getAdvertisement: async (id) => {
-        const response = await api.get(`/advertisements/${id}/`);
-        return response.data;
+        const response = await fetch(`/api/advertisements/${id}/`);
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Product not found');
+            }
+            throw new Error('Failed to fetch product details');
+        }
+        return response.json();
     },
 
     createAdvertisement: async (data) => {
@@ -118,5 +124,35 @@ export const advertisementService = {
             params: filters
         });
         return response.data;
-    }
+    },
+
+    getListingMetrics: async (id) => {
+        try {
+            const response = await fetch(`/api/advertisements/${id}/listing-metrics/`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+            if (!response.ok) {
+                throw new Error('Metrics not available');
+            }
+            return response.json();
+        } catch (error) {
+            console.log('Failed to fetch metrics:', error);
+            return null;
+        }
+    },
+
+    updateAdvertisement: async (id, data) => {
+        const response = await fetch(`/api/advertisements/${id}/`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) throw new Error('Failed to update advertisement');
+        return response.json();
+    },
 };

@@ -25,11 +25,45 @@ def AdvertisementListView(Request):
     serializer = AdvertisementSerializer(advertisements, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-def GetAdvertismenet(request,pk):
+@api_view(['GET', 'PUT', 'DELETE'])
+def GetAdvertismenet(request, pk):
     advertisement = get_object_or_404(Advertisement, id=pk)
-    serializer = AdvertisementSerializer(advertisement, many=False)
-    return Response(serializer.data)
+    
+    # GET requests are public
+    if request.method == 'GET':
+        if request.user.is_authenticated and request.user != advertisement.user:
+            advertisement.increment_view()
+        serializer = AdvertisementSerializer(advertisement)
+        return Response(serializer.data)
+    
+    # For PUT and DELETE, require authentication and ownership
+    if not request.user.is_authenticated:
+        return Response(
+            {'error': 'Authentication required'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+        
+    if advertisement.user != request.user:
+        return Response(
+            {'error': 'You do not have permission to modify this advertisement'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    if request.method == 'PUT':
+        serializer = AdvertisementSerializer(
+            advertisement, 
+            data=request.data, 
+            context={'request': request},
+            partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    if request.method == 'DELETE':
+        advertisement.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -286,22 +320,60 @@ def toggle_favorite(request, pk):
 @permission_classes([IsAuthenticated])
 def start_chat(request, ad_id):
     advertisement = get_object_or_404(Advertisement, id=ad_id)
+    
+    # Don't allow messaging your own ad
     if advertisement.user == request.user:
         return Response(
-            {'error': 'Cannot start chat with yourself'},
+            {'error': 'Cannot message your own advertisement'},
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    chat_room, created = ChatRoom.objects.get_or_create(
+    # Check if chat already exists
+    existing_chat = ChatRoom.objects.filter(
+        advertisement=advertisement,
+        buyer=request.user,
+        seller=advertisement.user
+    ).first()
+    
+    if existing_chat:
+        # Add new message to existing chat
+        ChatMessage.objects.create(
+            room=existing_chat,
+            sender=request.user,
+            message=request.data.get('message')
+        )
+        serializer = ChatRoomSerializer(existing_chat)
+        return Response(serializer.data)
+    
+    # Create new chat room
+    chat_room = ChatRoom.objects.create(
         advertisement=advertisement,
         buyer=request.user,
         seller=advertisement.user
     )
     
-    return Response({
-        'room_id': chat_room.id,
-        'created': created
-    })
+    # Create first message
+    ChatMessage.objects.create(
+        room=chat_room,
+        sender=request.user,
+        message=request.data.get('message')
+    )
+    
+    # Increment message count
+    advertisement.messages_count += 1
+    advertisement.save(update_fields=['messages_count'])
+    
+    # Create notification for seller
+    Notification.objects.create(
+        user=advertisement.user,
+        type='message',
+        title='New Message',
+        message=f'You have a new message about your listing: {advertisement.title}',
+        link=f'/chat/{chat_room.id}'
+    )
+    
+    serializer = ChatRoomSerializer(chat_room)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -384,3 +456,44 @@ def search_advertisements(request):
     
     serializer = AdvertisementSerializer(queryset, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_advertisement_metrics(request, pk):
+    advertisement = get_object_or_404(Advertisement, pk=pk)
+    
+    # Only owner can see metrics
+    if advertisement.user != request.user:
+        return Response(
+            {'error': 'Permission denied'},
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    metrics = {
+        'views': advertisement.views_count,
+        'messages': advertisement.messages_count,
+        'offers': advertisement.offers_count,
+        'saves': advertisement.saved_count
+    }
+    
+    return Response(metrics)
+
+@api_view(['GET'])
+def get_listing_metrics(request, pk):
+    advertisement = get_object_or_404(Advertisement, pk=pk)
+    
+    # If user is not authenticated or not the owner, return empty metrics
+    if not request.user.is_authenticated or request.user != advertisement.user:
+        return Response({
+            'views': 0,
+            'messages': 0,
+            'offers': 0
+        })
+    
+    metrics = {
+        'views': advertisement.views_count,
+        'messages': ChatRoom.objects.filter(advertisement=advertisement).count(),
+        'offers': Offer.objects.filter(advertisement=advertisement).count(),
+    }
+    
+    return Response(metrics)

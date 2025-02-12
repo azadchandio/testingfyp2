@@ -158,6 +158,13 @@ def get_default_expires_at():
     return timezone.now() + timezone.timedelta(days=30)
 
 class Advertisement(models.Model):
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('pending', 'Pending'),
+        ('sold', 'Sold'),
+        ('expired', 'Expired')
+    ]
+    
     CONDITION_CHOICES = [
         ('new', 'New'),
         ('like_new', 'Like New'),
@@ -165,72 +172,91 @@ class Advertisement(models.Model):
         ('fair', 'Fair'),
         ('poor', 'Poor')
     ]
-    STATUS_CHOICES = [
-        ('active', 'Active'),
-        ('pending', 'Pending Review'),
-        ('sold', 'Sold'),
-        ('expired', 'Expired'),
-        ('flagged', 'Flagged'),
-    ]
-    
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    negotiable = models.BooleanField(default=False)
-    condition = models.CharField(
-        max_length=20,
-        choices=CONDITION_CHOICES,
-        default='good'
-    )
-    category = models.ForeignKey('Category', on_delete=models.CASCADE)
-    subcategory = models.ForeignKey('SubCategory', on_delete=models.CASCADE)
-    location = models.ForeignKey('Location', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    condition = models.CharField(max_length=20, choices=CONDITION_CHOICES)
+    brand = models.CharField(max_length=100, null=True, blank=True)
+    tags = models.CharField(max_length=200, null=True, blank=True)
+    
+    # Metrics fields
     views_count = models.IntegerField(default=0)
+    messages_count = models.IntegerField(default=0)
+    offers_count = models.IntegerField(default=0)
+    saved_count = models.IntegerField(default=0)
+    reported_count = models.IntegerField(default=0)
+    
+    # Additional metrics fields
+    # view_count = models.IntegerField(default=0)
+    # message_count = models.IntegerField(default=0)
+    # offer_count = models.IntegerField(default=0)
+    
+    # Status and dates
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     featured = models.BooleanField(default=False)
     featured_until = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    expires_at = models.DateTimeField(
-        null=True, 
-        blank=True,
-        default=get_default_expires_at  # Use the function here
-    )
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    # Contact Information
+    show_phone = models.BooleanField(default=False)
     contact_phone = models.CharField(max_length=15, null=True, blank=True)
-    show_phone = models.BooleanField(default=True)
     allow_offers = models.BooleanField(default=True)
-    brand = models.CharField(max_length=100, null=True, blank=True)
+    negotiable = models.BooleanField(default=True)
+    
+    # Vehicle/Property specific fields (optional)
     model = models.CharField(max_length=100, null=True, blank=True)
     year = models.IntegerField(null=True, blank=True)
-    saved_count = models.IntegerField(default=0)
-    reported_count = models.IntegerField(default=0)
 
     class Meta:
-        ordering = ['-created_at']
         indexes = [
             models.Index(fields=['status', 'created_at']),
             models.Index(fields=['category', 'status']),
             models.Index(fields=['location', 'status']),
         ]
 
-    def increment_view_count(self):
-        self.views_count += 1
-        self.save()
-
-    def save(self, *args, **kwargs):
-        # Auto-update status based on expiry
-        if self.expires_at < timezone.now():
-            self.status = 'expired'
-        
-        # Increment saved_count when featured is True
-        if self.featured and not self.pk:  # New featured ad
-            self.saved_count += 1
-            
-        super().save(*args, **kwargs)
-
     def __str__(self):
-        return self.title  # Ensure this returns a meaningful name    
+        return self.title
+
+    def increment_view(self):
+        self.views_count += 1
+        self.save(update_fields=['views_count'])
+
+    def increment_message(self):
+        self.messages_count += 1
+        self.save(update_fields=['messages_count'])
+
+    def increment_offer(self):
+        self.offers_count += 1
+        self.save(update_fields=['offers_count'])
+
+    def increment_save(self):
+        self.saved_count += 1
+        self.save(update_fields=['saved_count'])
+
+    def clean(self):
+        # Validate contact information
+        if self.show_phone and not self.contact_phone:
+            raise ValidationError({
+                'contact_phone': 'Contact phone is required when show_phone is enabled.'
+            })
+        
+        # Validate vehicle/property fields if applicable
+        if self.category.name.lower() in ['vehicles', 'properties']:
+            if not self.model:
+                raise ValidationError({
+                    'model': 'Model is required for vehicle and property listings.'
+                })
+            if not self.year:
+                raise ValidationError({
+                    'year': 'Year is required for vehicle and property listings.'
+                })
 
 # Image Model
 class Image(models.Model):
