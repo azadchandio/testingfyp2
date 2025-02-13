@@ -1,4 +1,3 @@
-// SubCategory.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -6,31 +5,42 @@ import './SubCategory.css';
 
 const SubCategory = () => {
   const navigate = useNavigate();
-  const { slug } = useParams();
+  const { slug: categoryId } = useParams(); // Rename slug to categoryId for clarity
   const [subCategories, setSubCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchSubCategories = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/categories/${slug}/subcategories/`);
+        setLoading(true);
+        const response = await axios.get(`http://127.0.0.1:8000/api/categories/${categoryId}/subcategories/`);
         setSubCategories(response.data);
+        setError(null);
       } catch (error) {
         console.error('Error fetching subcategories:', error);
+        setError('Failed to load subcategories. Please try again.');
       } finally {
         setLoading(false);
       }
     };
-    fetchSubCategories();
-  }, [slug]);
 
-  const handleSubCategorySelect = (subCategorySlug) => {
-    // Updated to use slugs consistently
-    navigate(`/listing/details/${slug}/${subCategorySlug}`);
+    if (categoryId) {
+      fetchSubCategories();
+    }
+  }, [categoryId]);
+
+  const handleSubCategorySelect = (subCategory) => {
+    // Navigate using ID parameters to match the route in App.js
+    navigate(`/listing/details/${categoryId}/${subCategory.id}`);
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="loading-spinner">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error-message">{error}</div>;
   }
 
   return (
@@ -46,14 +56,14 @@ const SubCategory = () => {
               <div 
                 key={subCategory.id}
                 className="sub-category-card"
-                onClick={() => handleSubCategorySelect(subCategory.slug)}
+                onClick={() => handleSubCategorySelect(subCategory)}
               >
                 <span className="sub-category-name">{subCategory.name}</span>
                 <span className="arrow-icon">›</span>
               </div>
             ))
           ) : (
-            <div>No Subcategories Found</div>
+            <div className="no-subcategories">No Subcategories Found</div>
           )}
         </div>
       </div>

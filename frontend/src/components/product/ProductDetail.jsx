@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaClock, FaBookmark, FaEdit, FaStar, FaEye, FaEnvelope, FaHandshake } from "react-icons/fa";
+import { FaMapMarkerAlt, FaClock, FaBookmark, FaEdit, FaStar, FaEye, FaEnvelope, FaHandshake, FaTimes } from "react-icons/fa";
 import { LuMessageSquareMore } from "react-icons/lu";
 import { CiDollar } from "react-icons/ci";
 import { FaGreaterThan } from "react-icons/fa6";
@@ -8,6 +8,44 @@ import { useAuth } from "../../context/AuthContext";
 import { advertisementService } from "../../services/advertisement.service";
 import { messageService } from "../../services/message.service";
 import "./ProductDetail.css";
+
+const MessageModal = ({ onClose, onSubmit, loading }) => {
+  const [message, setMessage] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(message);
+  };
+
+  return (
+    <div className="message-modal-overlay">
+      <div className="message-modal">
+        <div className="modal-header">
+          <h3>Send Message</h3>
+          <button onClick={onClose} className="close-button">
+            <FaTimes />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Write your message here..."
+            required
+          />
+          <div className="modal-buttons">
+            <button type="button" onClick={onClose} className="cancel-button">
+              Cancel
+            </button>
+            <button type="submit" className="send-button" disabled={loading}>
+              {loading ? 'Sending...' : 'Send Message'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -20,6 +58,7 @@ const ProductDetail = () => {
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [message, setMessage] = useState("");
   
   useEffect(() => {
@@ -91,20 +130,23 @@ const ProductDetail = () => {
     navigate(`/send-offer/${id}`);
   };
 
-  const handleMessageSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) {
+  const handleMessageSubmit = async (message) => {
+    if (!isAuthenticated) {
       navigate('/login');
       return;
     }
 
     try {
+      setSendingMessage(true);
       await messageService.startChat(product.id, message);
-      setMessage("");
       setShowMessageModal(false);
       // Show success notification
+      alert('Message sent successfully!');
     } catch (error) {
       console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setSendingMessage(false);
     }
   };
 
@@ -195,27 +237,31 @@ const ProductDetail = () => {
     );
   };
 
-  const MessageModal = () => (
-    <div className={`message-modal ${showMessageModal ? 'show' : ''}`}>
-      <div className="message-modal-content">
-        <h3>Message to Seller</h3>
-        <form onSubmit={handleMessageSubmit}>
-          <textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Write your message..."
-            required
-          />
-          <div className="modal-buttons">
-            <button type="submit">Send Message</button>
-            <button type="button" onClick={() => setShowMessageModal(false)}>
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+  const renderMessageButton = () => {
+    if (!isAuthenticated) {
+      return (
+        <button 
+          className="message-button"
+          onClick={() => navigate('/login')}
+        >
+          <FaEnvelope /> Message Seller
+        </button>
+      );
+    }
+
+    if (user?.id !== product?.user?.id) {
+      return (
+        <button 
+          className="message-button"
+          onClick={() => setShowMessageModal(true)}
+        >
+          <FaEnvelope /> Message Seller
+        </button>
+      );
+    }
+
+    return null;
+  };
 
   if (loading) {
     return (
@@ -358,7 +404,13 @@ const ProductDetail = () => {
       )}
 
       {/* Message Modal */}
-      {showMessageModal && <MessageModal />}
+      {showMessageModal && (
+        <MessageModal
+          onClose={() => setShowMessageModal(false)}
+          onSubmit={handleMessageSubmit}
+          loading={sendingMessage}
+        />
+      )}
     </div>
   );
 };

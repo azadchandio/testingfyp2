@@ -141,13 +141,10 @@ class SubCategory(models.Model):
 
 # Location Model
 class Location(models.Model):
-    city = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True)
-    is_active = models.BooleanField(default=True)
-
+    state = models.CharField(max_length=100)
+    city = models.CharField(max_length=100)
+    
     def __str__(self):
         return f"{self.city}, {self.state}, {self.country}"
 
@@ -179,7 +176,7 @@ class Advertisement(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES)
     brand = models.CharField(max_length=100, null=True, blank=True)
     tags = models.CharField(max_length=200, null=True, blank=True)
@@ -190,12 +187,7 @@ class Advertisement(models.Model):
     offers_count = models.IntegerField(default=0)
     saved_count = models.IntegerField(default=0)
     reported_count = models.IntegerField(default=0)
-    
-    # Additional metrics fields
-    # view_count = models.IntegerField(default=0)
-    # message_count = models.IntegerField(default=0)
-    # offer_count = models.IntegerField(default=0)
-    
+        
     # Status and dates
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     featured = models.BooleanField(default=False)
