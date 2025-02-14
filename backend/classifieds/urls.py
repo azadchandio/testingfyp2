@@ -1,7 +1,7 @@
 #classifieds/urls.py
 
 from django.urls import path, include
-from .views import  AdvertisementListView ,GetAdvertismenet, OfferViewSet, ChatViewSet, NotificationViewSet
+from .views import  AdvertisementListView ,GetAdvertismenet, OfferViewSet, ChatViewSet, NotificationViewSet, LocationListCreateView, LocationDetailView, LocationSearchView
 from . import views
 from rest_framework.routers import DefaultRouter
 
@@ -46,4 +46,8 @@ urlpatterns = [
         'get': 'messages',
         'post': 'send_message'
     }), name='chat-messages'),
+
+    path('locations/', LocationListCreateView.as_view(), name='location-list-create'),
+    path('locations/<int:pk>/', LocationDetailView.as_view(), name='location-detail'),
+    path('locations/search/', LocationSearchView.as_view(), name='location-search'),
 ]

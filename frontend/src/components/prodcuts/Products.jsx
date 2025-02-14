@@ -34,15 +34,15 @@ const ProductCard = ({ product }) => {
   }, [product.created_at]);
 
   return (
-    <div className="product-card" onClick={() => navigate(`/product/${product.id}`)}>
-      <div className="image-container">
+    <div className="product-card" >
+      <div className="image-container" onClick={() => navigate(`/product/${product.id}`)}>
         <img 
           src={product.images && product.images.length > 0 ? `http://127.0.0.1:8000${product.images[0].image_url}` : '/default-image.jpg'} 
           alt={product.title} 
           className="product-image" 
         />
       </div>
-      <div className="content">
+      <div className="content" onClick={() => navigate(`/product/${product.id}`)}>
         <div className="price">Rs {product.price ? product.price.toLocaleString() : 'N/A'}</div>
         <h3 className="title">{product.title || 'No Title'}</h3>
         <div className="info">

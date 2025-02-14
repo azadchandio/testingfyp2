@@ -14,7 +14,11 @@ const INITIAL_FORM_STATE = {
   condition: '',
   model: '',
   year: '',
-  location: '',
+  location: {
+    country: '',
+    state: '',
+    city: ''
+  },
   contact_phone: '',
   show_phone: false,
   allow_offers: true,
@@ -25,6 +29,14 @@ const INITIAL_FORM_STATE = {
 };
 
 const MAX_IMAGES = 6;
+
+const CONDITION_CHOICES = [
+  { value: 'new', label: 'New' },
+  { value: 'like_new', label: 'Like New' },
+  { value: 'good', label: 'Good' },
+  { value: 'fair', label: 'Fair' },
+  { value: 'poor', label: 'Poor' }
+];
 
 const ListingDetails = () => {
   const navigate = useNavigate();
@@ -38,6 +50,9 @@ const ListingDetails = () => {
   const [categoryName, setCategoryName] = useState('');
   const [subcategoryName, setSubcategoryName] = useState('');
   const [previewImages, setPreviewImages] = useState([]);
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -45,7 +60,8 @@ const ListingDetails = () => {
       try {
         await Promise.all([
           loadCategoryData(),
-          isEditMode && loadListingData()
+          isEditMode && loadListingData(),
+          loadLocationData()
         ]);
       } catch (error) {
         console.error('Error loading data:', error);
@@ -54,39 +70,43 @@ const ListingDetails = () => {
         setLoading(false);
       }
     };
-
+  
     loadData();
   }, [categoryId, subCategoryId, editId, isEditMode]);
 
-  const loadCategoryData = async () => {
-    try {
-      const [categoryResponse, subcategoryResponse] = await Promise.all([
-        fetch(`/api/categories/${categoryId}/`),
-        fetch(`/api/categories/${categoryId}/subcategories/`)
-      ]);
+const loadCategoryData = async () => {
+  try {
+    const [categoryResponse, subcategoryResponse] = await Promise.all([
+      fetch(`/api/categories/${categoryId}/`),
+      fetch(`/api/categories/${categoryId}/subcategories/`)
+    ]);
 
-      if (!categoryResponse.ok || !subcategoryResponse.ok) {
-        throw new Error('Failed to fetch category data');
-      }
-
-      const categoryData = await categoryResponse.json();
-      const subcategoriesData = await subcategoryResponse.json();
-      
-      setCategoryName(categoryData.name);
-      const subcategory = subcategoriesData.find(sub => sub.id === parseInt(subCategoryId));
-      
-      if (subcategory) {
-        setSubcategoryName(subcategory.name);
-        setFormData(prev => ({
-          ...prev,
-          category: categoryId,
-          subcategory: subCategoryId
-        }));
-      }
-    } catch (error) {
-      throw new Error('Error loading category data: ' + error.message);
+    if (!categoryResponse.ok || !subcategoryResponse.ok) {
+      throw new Error('Failed to fetch category data');
     }
-  };
+
+    const categoryData = await categoryResponse.json();
+    const subcategoriesData = await subcategoryResponse.json();
+    
+    console.log('Category Data:', categoryData);
+    console.log('Subcategories Data:', subcategoriesData);
+    
+    setCategoryName(categoryData.name);
+    const subcategory = subcategoriesData.find(sub => sub.id === parseInt(subCategoryId));
+    
+    if (subcategory) {
+      setSubcategoryName(subcategory.name);
+      setFormData(prev => ({
+        ...prev,
+        category: parseInt(categoryId),
+        subcategory: parseInt(subCategoryId)
+      }));
+    }
+  } catch (error) {
+    console.error('Error loading category data:', error);
+    throw new Error('Error loading category data: ' + error.message);
+  }
+};
 
   const loadListingData = async () => {
     try {
@@ -103,14 +123,63 @@ const ListingDetails = () => {
     }
   };
 
+const loadLocationData = async () => {
+  try {
+    const response = await fetch('/api/locations/search/');
+    if (!response.ok) throw new Error('Failed to fetch locations');
+    const data = await response.json();
+    console.log('Location Data:', data);
+    
+    // Extract unique values for dropdowns
+    const uniqueCountries = [...new Set(data.map(loc => loc.country))];
+    setCountries(uniqueCountries);
+
+    // If editing, also set states and cities for the selected location
+    if (formData.location.country) {
+      const countryLocations = data.filter(loc => loc.country === formData.location.country);
+      const uniqueStates = [...new Set(countryLocations.map(loc => loc.state))];
+      setStates(uniqueStates);
+
+      if (formData.location.state) {
+        const stateLocations = countryLocations.filter(loc => loc.state === formData.location.state);
+        const uniqueCities = [...new Set(stateLocations.map(loc => loc.city))];
+        setCities(uniqueCities);
+      }
+    }
+  } catch (error) {
+    console.error('Error loading locations:', error);
+    setErrors(prev => ({ ...prev, loading: 'Failed to load locations' }));
+  }
+};
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    const newValue = type === 'checkbox' ? checked : value;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: newValue
-    }));
+    
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else if (name === 'price') {
+      // Only allow numbers and decimal point
+      const numericValue = value.replace(/[^0-9.]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    } else if (name === 'year') {
+      // Only allow numbers
+      const numericValue = value.replace(/[^0-9]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: numericValue
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
 
     // Clear error when user starts typing
     if (errors[name]) {
@@ -137,25 +206,84 @@ const ListingDetails = () => {
     }
   };
 
+  const handleCountryChange = async (e) => {
+    const country = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      location: { ...prev.location, country, state: '', city: '' }
+    }));
+
+    try {
+      const response = await fetch(`/api/locations/search/?country=${country}`);
+      if (!response.ok) throw new Error('Failed to fetch states');
+      const data = await response.json();
+      const uniqueStates = [...new Set(data.map(loc => loc.state))];
+      setStates(uniqueStates);
+      setCities([]);
+    } catch (error) {
+      console.error('Error loading states:', error);
+    }
+  };
+
+  const handleStateChange = async (e) => {
+    const state = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      location: { ...prev.location, state, city: '' }
+    }));
+
+    try {
+      const response = await fetch(`/api/locations/search/?country=${formData.location.country}&state=${state}`);
+      if (!response.ok) throw new Error('Failed to fetch cities');
+      const data = await response.json();
+      const uniqueCities = [...new Set(data.map(loc => loc.city))];
+      setCities(uniqueCities);
+    } catch (error) {
+      console.error('Error loading cities:', error);
+    }
+  };
+
+  const handleCityChange = (e) => {
+    const city = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      location: { ...prev.location, city }
+    }));
+  };
+
   const validateForm = () => {
     const newErrors = {};
-    const requiredFields = ['title', 'description', 'price', 'contact_phone', 'location'];
     
+    // Required fields validation
+    const requiredFields = ['title', 'description', 'price', 'contact_phone', 'condition'];
     requiredFields.forEach(field => {
-      if (!formData[field]?.trim()) {
+      if (!formData[field]) {
         newErrors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
       }
     });
 
+    // Category validation
+    if (!formData.category || !formData.subcategory) {
+      newErrors.category = 'Category and subcategory are required';
+    }
+
+    // Location validation
+    if (!formData.location.country) newErrors.country = 'Country is required';
+    if (!formData.location.state) newErrors.state = 'State is required';
+    if (!formData.location.city) newErrors.city = 'City is required';
+
+    // Image validation
     if (formData.images.length === 0) {
       newErrors.images = 'At least one image is required';
     }
 
-    const price = parseFloat(formData.price.replace(/,/g, ''));
+    // Price validation
+    const price = parseFloat(formData.price);
     if (isNaN(price) || price <= 0) {
       newErrors.price = 'Please enter a valid price';
     }
 
+    // Phone validation
     const phoneRegex = /^\+?[\d\s-]{10,}$/;
     if (!phoneRegex.test(formData.contact_phone)) {
       newErrors.contact_phone = 'Please enter a valid phone number';
@@ -168,40 +296,89 @@ const ListingDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+    
     setLoading(true);
     const formDataToSend = new FormData();
-
-    Object.entries(formData).forEach(([key, value]) => {
-      if (key === 'images') {
-        value.forEach(image => formDataToSend.append('images', image));
-      } else {
-        formDataToSend.append(key, value);
-      }
-    });
-
+  
     try {
-      const endpoint = isEditMode 
-        ? `/api/advertisements/${editId}/update/`
-        : '/api/advertisements/create/';
-        
-      const response = await fetch(endpoint, {
-        method: isEditMode ? 'PUT' : 'POST',
+      // Get location ID
+      const locationResponse = await fetch(
+        `/api/locations/search/?country=${formData.location.country}&state=${formData.location.state}&city=${formData.location.city}`
+      );
+      
+      if (!locationResponse.ok) {
+        throw new Error('Failed to find location');
+      }
+  
+      const locations = await locationResponse.json();
+      console.log('Locations:', locations);
+      
+      if (!locations || locations.length === 0) {
+        throw new Error('Location not found. Please select a valid location.');
+      }
+  
+      const locationId = locations[0].id;
+  
+      // Append all form data with proper type handling
+      const stringFields = ['title', 'description', 'brand', 'model', 'condition', 'contact_phone'];
+      stringFields.forEach(field => {
+        if (formData[field]) {
+          formDataToSend.append(field, formData[field]);
+        }
+      });
+  
+      // Handle numeric fields
+      formDataToSend.append('price', parseFloat(formData.price) || 0);
+      if (formData.year) {
+        formDataToSend.append('year', parseInt(formData.year));
+      }
+  
+      // Handle boolean fields
+      const booleanFields = ['show_phone', 'allow_offers', 'negotiable'];
+      booleanFields.forEach(field => {
+        formDataToSend.append(field, formData[field]);
+      });
+  
+      // Handle category and location
+      formDataToSend.append('category', parseInt(categoryId));
+      formDataToSend.append('subcategory', parseInt(subCategoryId));
+      formDataToSend.append('location', locationId);
+  
+      // Handle images
+      formData.images.forEach(image => {
+        formDataToSend.append('images', image);
+      });
+  
+      // Log FormData before sending
+      for (let [key, value] of formDataToSend.entries()) {
+        console.log(key, value);
+      }
+  
+      // Make the API call
+      const response = await fetch('/api/advertisements/create/', {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
         body: formDataToSend
       });
-
+  
       if (!response.ok) {
-        throw new Error('Failed to save listing');
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        throw new Error(errorData.detail || 'Failed to create listing');
       }
-
+  
       const data = await response.json();
-      navigate(`/product/${data.id}`);
+      console.log('Listing created:', data);
+      alert('Your listing has been successfully created!');
+      navigate('/');
     } catch (error) {
       console.error('Error saving listing:', error);
-      setErrors(prev => ({ ...prev, submit: 'Failed to save listing' }));
+      setErrors(prev => ({ 
+        ...prev, 
+        submit: error.message || 'Failed to save listing'
+      }));
     } finally {
       setLoading(false);
     }
@@ -328,16 +505,56 @@ const ListingDetails = () => {
               {errors.price && <span className="error-message">{errors.price}</span>}
             </div>
 
-            <div className="form-group">
-              <label>Location*</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleInputChange}
-                placeholder="Enter location"
-              />
-              {errors.location && <span className="error-message">{errors.location}</span>}
+            <div className="form-group location-fields">
+              <label>Location Details*</label>
+              <div className="form-row">
+                <div className="form-group">
+                  <select
+                    className="form-select"
+                    value={formData.location.country}
+                    onChange={handleCountryChange}
+                    required
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map(country => (
+                      <option key={country} value={country}>{country}</option>
+                    ))}
+                  </select>
+                  {errors.country && <span className="error-message">{errors.country}</span>}
+                </div>
+
+                <div className="form-group">
+                  <select
+                    className="form-select"
+                    value={formData.location.state}
+                    onChange={handleStateChange}
+                    required
+                    disabled={!formData.location.country}
+                  >
+                    <option value="">Select State</option>
+                    {states.map(state => (
+                      <option key={state} value={state}>{state}</option>
+                    ))}
+                  </select>
+                  {errors.state && <span className="error-message">{errors.state}</span>}
+                </div>
+
+                <div className="form-group">
+                  <select
+                    className="form-select"
+                    value={formData.location.city}
+                    onChange={handleCityChange}
+                    required
+                    disabled={!formData.location.state}
+                  >
+                    <option value="">Select City</option>
+                    {cities.map(city => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                  {errors.city && <span className="error-message">{errors.city}</span>}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -414,6 +631,25 @@ const ListingDetails = () => {
               />
               Price is negotiable
             </label>
+          </div>
+
+          <div className="form-group">
+            <label>Condition*</label>
+            <select
+              name="condition"
+              value={formData.condition}
+              onChange={handleInputChange}
+              className="form-select"
+              required
+            >
+              <option value="">Select Condition</option>
+              {CONDITION_CHOICES.map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            {errors.condition && <span className="error-message">{errors.condition}</span>}
           </div>
 
           <button type="submit" className="submit-button" disabled={loading}>

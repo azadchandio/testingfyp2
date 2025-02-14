@@ -144,7 +144,14 @@ class Location(models.Model):
     country = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
-    
+    created_by = models.ForeignKey(
+        User,  # Direct reference to the User model
+        on_delete=models.CASCADE,
+        related_name='locations',
+        null=True,  # Add this
+        blank=True  # Add this
+    )
+
     def __str__(self):
         return f"{self.city}, {self.state}, {self.country}"
 

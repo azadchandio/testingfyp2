@@ -47,8 +47,9 @@ class ImageSerializer(serializers.ModelSerializer):
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['city', 'state', 'country']  # You can add other fields as needed
-
+        fields = ['id', 'country', 'state', 'city', 'created_by']
+        read_only_fields = ['created_by']
+        
 # AdvertisementSerializer with LocationSerializer
 class AdvertisementSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)

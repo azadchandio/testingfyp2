@@ -15,9 +15,86 @@ from django.contrib.auth import authenticate
 from .serializers import UserSerializer, RegisterSerializer
 from .models import User, Advertisement, KYC, Category,SubCategory, Offer, ChatRoom, Notification, Favorite, ChatMessage
 from .serializers import AdvertisementSerializer, CategorySerializer, SubCategorySerializer, CategoryDetailSerializer, OfferSerializer, ChatMessageSerializer, NotificationSerializer
-from rest_framework import generics, filters, viewsets
+from rest_framework import generics, filters, viewsets,permissions
 from rest_framework.views import APIView
 from .serializers import ReportSerializer
+
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from .models import Location
+from .serializers import LocationSerializer
+
+# Location List and Create View
+class LocationListCreateView(generics.ListCreateAPIView):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            return Response(
+                {'error': 'You must be logged in to create locations.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer.save(created_by=self.request.user)
+
+# Location Detail, Update, and Delete View
+class LocationDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Location.objects.all()
+    serializer_class = LocationSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def perform_update(self, serializer):
+        if not self.request.user.is_authenticated:
+            return Response(
+                {'error': 'You must be logged in to update locations.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        if self.request.user == serializer.instance.created_by or self.request.user.is_staff:
+            serializer.save()
+        else:
+            return Response(
+                {'error': 'You do not have permission to update this location.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+    def perform_destroy(self, instance):
+        if not self.request.user.is_authenticated:
+            return Response(
+                {'error': 'You must be logged in to delete locations.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
+        if self.request.user == instance.created_by or self.request.user.is_staff:
+            instance.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(
+                {'error': 'You do not have permission to delete this location.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+# Location Search View
+class LocationSearchView(generics.ListAPIView):
+    serializer_class = LocationSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = Location.objects.all()
+        city = self.request.query_params.get('city', None)
+        state = self.request.query_params.get('state', None)
+        country = self.request.query_params.get('country', None)
+
+        if city:
+            queryset = queryset.filter(city__icontains=city)
+        if state:
+            queryset = queryset.filter(state__icontains=state)
+        if country:
+            queryset = queryset.filter(country__icontains=country)
+
+        return queryset
 
 @api_view(['GET'])
 def AdvertisementListView(Request):
