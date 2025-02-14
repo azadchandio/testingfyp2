@@ -175,4 +175,43 @@ export const advertisementService = {
         if (!response.ok) throw new Error('Failed to update advertisement');
         return response.json();
     },
+
+    updateListingStatus: async (listingId, newStatus) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.patch(
+                `${API_URL}${listingId}/`,
+                { status: newStatus },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error updating listing status:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    deleteListing: async (listingId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(
+                `${API_URL}${listingId}/`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error deleting listing:', error.response?.data || error.message);
+            throw error;
+        }
+    },
 };

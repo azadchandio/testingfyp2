@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FaEye, FaCommentAlt, FaEdit, FaEllipsisV } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaEye, FaCommentAlt, FaEdit, FaEllipsisV, FaTrash, FaPause, FaPlay } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { advertisementService } from '../../services/advertisement.service';
@@ -12,6 +12,8 @@ const ManageListings = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null); // Add error state
     const [activeTab, setActiveTab] = useState('all');
+    const [activeDropdown, setActiveDropdown] = useState(null);
+    const dropdownRef = useRef(null);
 
     const tabs = [
         { id: 'all', label: 'All Listings', count: 0 },
@@ -62,6 +64,82 @@ const ManageListings = () => {
         return listings.filter(listing => listing.status === activeTab);
     };
 
+    // Add click outside handler to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setActiveDropdown(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Add these new functions to handle status updates
+    const handleStatusUpdate = async (listingId, newStatus) => {
+        try {
+            setLoading(true);
+            const updatedListing = await advertisementService.updateListingStatus(listingId, newStatus);
+            
+            // Update the local state with the response from the server
+            setListings(prevListings => 
+                prevListings.map(listing => 
+                    listing.id === listingId 
+                        ? { ...listing, ...updatedListing }
+                        : listing
+                )
+            );
+            
+            // Update tab counts with the new listings
+            setListings(prevListings => {
+                updateTabCounts(prevListings);
+                return prevListings;
+            });
+            
+            setActiveDropdown(null);
+            
+            // Show success message
+            alert(`Listing ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`);
+        } catch (error) {
+            console.error('Error updating listing status:', error);
+            const errorMessage = error.response?.data?.detail || 
+                               error.response?.data?.message || 
+                               'Failed to update listing status. Please try again.';
+            setError(errorMessage);
+            // Show error in UI
+            alert(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDelete = async (listingId) => {
+        if (window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
+            try {
+                setLoading(true);
+                await advertisementService.deleteListing(listingId);
+                
+                // Remove the listing from local state
+                setListings(prevListings => 
+                    prevListings.filter(listing => listing.id !== listingId)
+                );
+                
+                // Update tab counts
+                updateTabCounts(listings.filter(listing => listing.id !== listingId));
+                setActiveDropdown(null);
+                
+                // Show success message
+                alert('Listing deleted successfully');
+            } catch (error) {
+                console.error('Error deleting listing:', error);
+                setError(error.response?.data?.message || 'Failed to delete listing. Please try again.');
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     // Render action buttons based on listing status
     const renderActionButton = (status) => {
         switch (status) {
@@ -75,6 +153,44 @@ const ManageListings = () => {
                 return null;
         }
     };
+
+    // Replace the more-options button and add dropdown menu
+    const renderMoreOptionsDropdown = (listing) => (
+        <div className="more-options-container-managelisting" ref={dropdownRef}>
+            <button 
+                className="more-options-managelisting"
+                onClick={() => setActiveDropdown(activeDropdown === listing.id ? null : listing.id)}
+            >
+                <FaEllipsisV />
+            </button>
+            
+            {activeDropdown === listing.id && (
+                <div className="dropdown-menu-managelisting">
+                    {listing.status === 'active' ? (
+                        <button 
+                            className="dropdown-item-managelisting"
+                            onClick={() => handleStatusUpdate(listing.id, 'inactive')}
+                        >
+                            <FaPause /> Deactivate Listing
+                        </button>
+                    ) : (
+                        <button 
+                            className="dropdown-item-managelisting"
+                            onClick={() => handleStatusUpdate(listing.id, 'active')}
+                        >
+                            <FaPlay /> Activate Listing
+                        </button>
+                    )}
+                    <button 
+                        className="dropdown-item-managelisting delete"
+                        onClick={() => handleDelete(listing.id)}
+                    >
+                        <FaTrash /> Delete Listing
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 
     if (loading) {
         return <div>Loading...</div>;
@@ -106,7 +222,12 @@ const ManageListings = () => {
                     {getFilteredListings().map(listing => (
                         <div key={listing.id} className="listing-card">
                             <div className="listing-image">
-                                <img src={listing.image} alt={listing.title} />
+                                <img 
+                                    src={listing.images && listing.images.length > 0 
+                                        ? `http://127.0.0.1:8000${listing.images[0].image_url}` 
+                                        : '/default-image.jpg'} 
+                                    alt={listing.title} 
+                                />
                             </div>
 
                             <div className="listing-content">
@@ -117,20 +238,18 @@ const ManageListings = () => {
                                     </div>
                                     <div className="listing-status">
                                         <span className={`status-badge ${listing.status}`}>
-                                            {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
+                                            {listing.status?.charAt(0).toUpperCase() + listing.status?.slice(1)}
                                         </span>
-                                        <button className="more-options">
-                                            <FaEllipsisV />
-                                        </button>
+                                        {renderMoreOptionsDropdown(listing)}
                                     </div>
                                 </div>
 
                                 <div className="listing-details">
                                     <span className="listing-price">Rs {listing.price}</span>
                                     <div className="listing-meta">
-                                        <span>{listing.location}</span>
+                                        <span>{listing.location?.city || 'N/A'}</span>
                                         <span className="separator">|</span>
-                                        <span>Posted on {new Date(listing.postedDate).toLocaleDateString()}</span>
+                                        <span>Posted on {new Date(listing.created_at).toLocaleDateString()}</span>
                                     </div>
                                 </div>
 
