@@ -1,6 +1,40 @@
+// AuthContext.jsx
 import { createContext, useState, useContext, useEffect } from 'react';
 import { authService } from '../services/auth.service';
 import PropTypes from 'prop-types';
+
+// First create the bookmark service
+const getBookmarkKey = (userId) => `bookmarks_${userId}`;
+
+const bookmarkService = {
+    getUserBookmarks: (userId) => {
+        try {
+            const key = getBookmarkKey(userId);
+            return JSON.parse(localStorage.getItem(key)) || [];
+        } catch (error) {
+            console.error('Error getting bookmarks:', error);
+            return [];
+        }
+    },
+
+    saveUserBookmarks: (userId, bookmarks) => {
+        try {
+            const key = getBookmarkKey(userId);
+            localStorage.setItem(key, JSON.stringify(bookmarks));
+        } catch (error) {
+            console.error('Error saving bookmarks:', error);
+        }
+    },
+
+    clearUserBookmarks: (userId) => {
+        try {
+            const key = getBookmarkKey(userId);
+            localStorage.removeItem(key);
+        } catch (error) {
+            console.error('Error clearing bookmarks:', error);
+        }
+    }
+};
 
 const AuthContext = createContext({
     user: null,
@@ -51,9 +85,12 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = () => {
+
         setUser(null);
         setIsAuthenticated(false);
-        authService.logout();
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
     };
 
     return (
@@ -73,3 +110,6 @@ export const AuthProvider = ({ children }) => {
 AuthProvider.propTypes = {
     children: PropTypes.node.isRequired
 };
+
+// Also export the bookmark service so it can be used in other components
+export { bookmarkService };
