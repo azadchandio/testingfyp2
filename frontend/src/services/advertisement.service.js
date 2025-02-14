@@ -14,6 +14,26 @@ export const advertisementService = {
         }
       },
 
+    // Fetch advertisements posted by the logged-in user
+    getUserAdvertisements: async (userId) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(API_URL, {
+                params: { user_id: userId },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching user advertisements:', error);
+            throw error;
+        }
+    },
+    
+
+
+    
     getAdvertisement: async (id) => {
         const response = await fetch(`/api/advertisements/${id}/`);
         if (!response.ok) {
@@ -64,10 +84,10 @@ export const advertisementService = {
         return response.data;
     },
 
-    getUserAdvertisements: async () => {
-        const response = await api.get('/advertisements/user/');
-        return response.data;
-    },
+    // getUserAdvertisements: async () => {
+    //     const response = await api.get('/advertisements/user/');
+    //     return response.data;
+    // },
 
     getFavorites: async () => {
         const response = await api.get('/advertisements/favorites/');

@@ -97,8 +97,12 @@ class LocationSearchView(generics.ListAPIView):
         return queryset
 
 @api_view(['GET'])
-def AdvertisementListView(Request):
-    advertisements = Advertisement.objects.all()
+def AdvertisementListView(request):
+    user_id = request.query_params.get('user_id')  # Get user_id from query parameters
+    if user_id:
+        advertisements = Advertisement.objects.filter(user_id=user_id)  # Filter by user_id
+    else:
+        advertisements = Advertisement.objects.all()  # Return all advertisements if no user_id is provided
     serializer = AdvertisementSerializer(advertisements, many=True)
     return Response(serializer.data)
 
