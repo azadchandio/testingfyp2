@@ -76,7 +76,6 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
     def get_metrics(self, obj):
         request = self.context.get('request')
-        # Only return metrics if the requester is authenticated and is the owner
         if request and request.user.is_authenticated and request.user == obj.user:
             return {
                 'views': obj.views_count,
@@ -90,25 +89,34 @@ class AdvertisementSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if request and request.user == obj.user:
             return {
-                'views': obj.view_count,
+                'views': obj.views_count,  # Changed from view_count to views_count
                 'messages': ChatRoom.objects.filter(advertisement=obj).count(),
                 'offers': Offer.objects.filter(advertisement=obj).count(),
             }
         return None
 
+    def create(self, validated_data):
+        location_data = validated_data.pop('location', None)
+
+        if location_data:
+            location_instance, _ = Location.objects.get_or_create(**location_data)
+            validated_data['location'] = location_instance
+
+        advertisement = Advertisement.objects.create(**validated_data)
+        return advertisement
+
     def update(self, instance, validated_data):
         location_data = validated_data.pop('location', None)
-        
+
         if location_data:
             location_instance, _ = Location.objects.get_or_create(**location_data)
             instance.location = location_instance
-        
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        
+
         instance.save()
         return instance
-
     
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

@@ -53,6 +53,7 @@ const ListingDetails = () => {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
+  const [conditionChoices, setConditionChoices] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -60,6 +61,7 @@ const ListingDetails = () => {
       try {
         await Promise.all([
           loadCategoryData(),
+          loadConditionChoices(), // Ensure this is called
           isEditMode && loadListingData(),
           loadLocationData()
         ]);
@@ -73,6 +75,32 @@ const ListingDetails = () => {
   
     loadData();
   }, [categoryId, subCategoryId, editId, isEditMode]);
+
+    // New function to load condition choices
+    const loadConditionChoices = async () => {
+      try {
+        const response = await fetch('/api/condition-choices/');
+        if (!response.ok) throw new Error('Failed to fetch conditions');
+        const data = await response.json();
+    
+        // Check if data is an array
+        if (Array.isArray(data)) {
+          setConditionChoices(data);
+        } else {
+          // If we get an object format, convert it to array format
+          const formattedChoices = Object.entries(data).map(([value, label]) => ({
+            value,
+            label
+          }));
+          setConditionChoices(formattedChoices);
+        }
+      } catch (error) {
+        console.error('Error loading conditions:', error);
+        // Fallback to default choices if the API fails
+        setConditionChoices(CONDITION_CHOICES);
+        setErrors(prev => ({ ...prev, loading: 'Failed to load conditions' }));
+      }
+    };
 
 const loadCategoryData = async () => {
   try {
@@ -294,6 +322,7 @@ const loadLocationData = async () => {
   };
 
   const handleSubmit = async (e) => {
+    console.log("clicked")
     e.preventDefault();
     if (!validateForm()) return;
     
@@ -311,52 +340,35 @@ const loadLocationData = async () => {
       }
   
       const locations = await locationResponse.json();
-      console.log('Locations:', locations);
-      
       if (!locations || locations.length === 0) {
         throw new Error('Location not found. Please select a valid location.');
       }
   
       const locationId = locations[0].id;
   
-      // Append all form data with proper type handling
-      const stringFields = ['title', 'description', 'brand', 'model', 'condition', 'contact_phone'];
-      stringFields.forEach(field => {
-        if (formData[field]) {
-          formDataToSend.append(field, formData[field]);
+      // Append form data
+      Object.entries(formData).forEach(([key, value]) => {
+        if (key === 'images') {
+          // Handle images separately
+          value.forEach(image => {
+            formDataToSend.append('images', image);
+          });
+        } else if (key === 'location') {
+          formDataToSend.append('location', locationId);
+        } else if (typeof value === 'boolean') {
+          formDataToSend.append(key, value.toString());
+        } else if (value !== null && value !== undefined) {
+          formDataToSend.append(key, value);
         }
       });
-  
-      // Handle numeric fields
-      formDataToSend.append('price', parseFloat(formData.price) || 0);
-      if (formData.year) {
-        formDataToSend.append('year', parseInt(formData.year));
-      }
-  
-      // Handle boolean fields
-      const booleanFields = ['show_phone', 'allow_offers', 'negotiable'];
-      booleanFields.forEach(field => {
-        formDataToSend.append(field, formData[field]);
-      });
-  
-      // Handle category and location
-      formDataToSend.append('category', parseInt(categoryId));
-      formDataToSend.append('subcategory', parseInt(subCategoryId));
-      formDataToSend.append('location', locationId);
-  
-      // Handle images
-      formData.images.forEach(image => {
-        formDataToSend.append('images', image);
-      });
-  
-      // Log FormData before sending
-      for (let [key, value] of formDataToSend.entries()) {
-        console.log(key, value);
-      }
-  
+
       // Make the API call
-      const response = await fetch('/api/advertisements/create/', {
-        method: 'POST',
+      const apiUrl = isEditMode 
+        ? `/api/advertisements/${editId}/`
+        : '/api/advertisements/create/';
+
+      const response = await fetch(apiUrl, {
+        method: isEditMode ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -365,7 +377,6 @@ const loadLocationData = async () => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Server error:', errorData);
         throw new Error(errorData.detail || 'Failed to create listing');
       }
   
@@ -538,7 +549,7 @@ const loadLocationData = async () => {
                   </select>
                   {errors.state && <span className="error-message">{errors.state}</span>}
                 </div>
-
+                    
                 <div className="form-group">
                   <select
                     className="form-select"
@@ -636,19 +647,19 @@ const loadLocationData = async () => {
           <div className="form-group">
             <label>Condition*</label>
             <select
-              name="condition"
-              value={formData.condition}
-              onChange={handleInputChange}
-              className="form-select"
-              required
-            >
-              <option value="">Select Condition</option>
-              {CONDITION_CHOICES.map(({ value, label }) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+          name="condition"
+          value={formData.condition}
+          onChange={handleInputChange}
+          className="form-select"
+          required
+        >
+          <option value="">Select Condition</option>
+          {conditionChoices.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
             {errors.condition && <span className="error-message">{errors.condition}</span>}
           </div>
 

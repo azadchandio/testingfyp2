@@ -28,18 +28,22 @@ import ManageListings from './components/listings/ManageListings'
 // import ProductScreen from './pages/ProductScreen'
 import ProductDetail from './components/product/ProductDetail'
 import Messages from './components/Messages/Messages'
+import SearchResults from './pages/SearchResults'
+import AdminPanel from './components/Admin/AdminPanel'
 
 // Protected Route Component
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, adminOnly }) => {
   const { isAuthenticated, loading } = useAuth();
   
   if (loading) return <div>Loading...</div>;
   if (!isAuthenticated) return <Navigate to="/login" />;
+  if (adminOnly && !isAuthenticated) return <Navigate to="/" />;
   return children;
 };
 
 ProtectedRoute.propTypes = {
-  children: PropTypes.node.isRequired
+  children: PropTypes.node.isRequired,
+  adminOnly: PropTypes.bool
 };
 
 const App = () => {
@@ -113,6 +117,17 @@ const App = () => {
               <Route path="/terms" element={<Terms />} />
               <Route path="/listing/subcategory/:slug" element={<SubCategory />} />
               <Route path="/listing/details/:categoryId/:subCategoryId" element={<ListingDetails />} />
+              
+              <Route path="/search" element={<SearchResults />} />
+
+              <Route 
+                path="/admin" 
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminPanel />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
           <Footer />

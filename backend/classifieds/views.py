@@ -25,6 +25,18 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import Location
 from .serializers import LocationSerializer
 
+@api_view(['GET'])
+def get_condition_choices(request):
+    """
+    API view to fetch condition choices for advertisements.
+    """
+    condition_choices = Advertisement.CONDITION_CHOICES
+    formatted_choices = [
+        {'value': choice[0], 'label': choice[1]} 
+        for choice in condition_choices
+    ]
+    return Response(formatted_choices)
+
 # Location List and Create View
 class LocationListCreateView(generics.ListCreateAPIView):
     queryset = Location.objects.all()
@@ -515,6 +527,13 @@ def search_advertisements(request):
         queryset = queryset.filter(
             Q(title__icontains=keyword) |
             Q(description__icontains=keyword)
+        )
+    
+    if 'location' in request.GET:
+        location = request.GET['location']
+        queryset = queryset.filter(
+            Q(location__city__icontains=location) |
+            Q(location__state__icontains=location)
         )
     
     if 'min_price' in request.GET:

@@ -140,10 +140,22 @@ export const advertisementService = {
     },
 
     searchWithFilters: async (filters) => {
-        const response = await api.get('/advertisements/search/', {
-            params: filters
-        });
-        return response.data;
+        try {
+            const queryParams = new URLSearchParams();
+            
+            if (filters.query) queryParams.append('keyword', filters.query);
+            if (filters.location) queryParams.append('location', filters.location);
+            if (filters.minPrice) queryParams.append('min_price', filters.minPrice);
+            if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
+            if (filters.condition) queryParams.append('condition', filters.condition);
+            if (filters.sortBy) queryParams.append('sort_by', filters.sortBy);
+
+            const response = await axios.get(`${API_URL}search/?${queryParams.toString()}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error searching advertisements:', error);
+            return [];
+        }
     },
 
     getListingMetrics: async (id) => {

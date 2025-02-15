@@ -36,15 +36,6 @@ const EditProfile = () => {
   };
 
 
-
-
-
-
-
-
-
-
-
   return (
     <div className="main-Content-Container">
       {/* Image and buttons section */}

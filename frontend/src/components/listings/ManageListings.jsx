@@ -10,61 +10,55 @@ const ManageListings = () => {
     const { user } = useAuth();
     const [listings, setListings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null); // Add error state
+    const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('all');
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [tabCounts, setTabCounts] = useState({
+        all: 0,
+        active: 0,
+        inactive: 0,
+        deleted: 0
+    });
     const dropdownRef = useRef(null);
 
     const tabs = [
-        { id: 'all', label: 'All Listings', count: 0 },
-        { id: 'active', label: 'Active Listings', count: 0 },
-        { id: 'inactive', label: 'Inactive Listings', count: 0 },
-        { id: 'deleted', label: 'Deleted Listings', count: 0 }
+        { id: 'all', label: 'All Listings', count: tabCounts.all },
+        { id: 'active', label: 'Active Listings', count: tabCounts.active },
+        { id: 'inactive', label: 'Inactive Listings', count: tabCounts.inactive },
+        { id: 'deleted', label: 'Deleted Listings', count: tabCounts.deleted }
     ];
 
-    // Fetch user's listings when the component mounts or the user changes
-    useEffect(() => {
-      const fetchUserListings = async () => {
-          if (user?.id) {
-              try {
-                  console.log('Fetching listings for user:', user.id); // Debugging
-                  const data = await advertisementService.getUserAdvertisements(user.id); // Pass user.id
-                  console.log('Listings fetched:', data); // Debugging
-                  setListings(data);
-                  updateTabCounts(data);
-              } catch (error) {
-                  console.error('Error fetching listings:', error);
-                  setError('Failed to fetch listings. Please try again later.');
-              } finally {
-                  setLoading(false);
-              }
-          }
+    // Update tab counts based on the current listings
+    const updateTabCounts = (currentListings) => {
+        const counts = {
+            all: currentListings.length,
+            active: currentListings.filter(listing => listing.status === 'active').length,
+            inactive: currentListings.filter(listing => listing.status === 'inactive').length,
+            deleted: currentListings.filter(listing => listing.status === 'deleted').length
         };
-        fetchUserListings();
-  
-  }, [user]);
-
-    // Update tab counts based on the fetched listings
-    const updateTabCounts = (listings) => {
-      const counts = {
-          all: listings.length,
-          active: listings.filter(listing => listing.status === 'active').length,
-          inactive: listings.filter(listing => listing.status === 'inactive').length,
-          deleted: listings.filter(listing => listing.status === 'deleted').length
-      };
-  
-      tabs.forEach(tab => {
-          tab.count = counts[tab.id];
-      });
-  };
-
-    // Filter listings based on the active tab
-    const getFilteredListings = () => {
-        if (activeTab === 'all') return listings;
-        return listings.filter(listing => listing.status === activeTab);
+        setTabCounts(counts);
     };
 
-    // Add click outside handler to close dropdown
+    // Fetch user's listings when component mounts
+    useEffect(() => {
+        const fetchUserListings = async () => {
+            if (user?.id) {
+                try {
+                    const data = await advertisementService.getUserAdvertisements(user.id);
+                    setListings(data);
+                    updateTabCounts(data);
+                } catch (error) {
+                    console.error('Error fetching listings:', error);
+                    setError('Failed to fetch listings. Please try again later.');
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        fetchUserListings();
+    }, [user]);
+
+    // Handle click outside dropdown
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -76,30 +70,28 @@ const ManageListings = () => {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Add these new functions to handle status updates
+    // Filter listings based on active tab
+    const getFilteredListings = () => {
+        if (activeTab === 'all') return listings;
+        return listings.filter(listing => listing.status === activeTab);
+    };
+
+    // Handle status update
     const handleStatusUpdate = async (listingId, newStatus) => {
         try {
             setLoading(true);
-            const updatedListing = await advertisementService.updateListingStatus(listingId, newStatus);
+            await advertisementService.updateListingStatus(listingId, newStatus);
             
-            // Update the local state with the response from the server
-            setListings(prevListings => 
-                prevListings.map(listing => 
-                    listing.id === listingId 
-                        ? { ...listing, ...updatedListing }
-                        : listing
-                )
+            const updatedListings = listings.map(listing => 
+                listing.id === listingId 
+                    ? { ...listing, status: newStatus }
+                    : listing
             );
             
-            // Update tab counts with the new listings
-            setListings(prevListings => {
-                updateTabCounts(prevListings);
-                return prevListings;
-            });
-            
+            setListings(updatedListings);
+            updateTabCounts(updatedListings);
             setActiveDropdown(null);
             
-            // Show success message
             alert(`Listing ${newStatus === 'active' ? 'activated' : 'deactivated'} successfully`);
         } catch (error) {
             console.error('Error updating listing status:', error);
@@ -107,29 +99,24 @@ const ManageListings = () => {
                                error.response?.data?.message || 
                                'Failed to update listing status. Please try again.';
             setError(errorMessage);
-            // Show error in UI
             alert(errorMessage);
         } finally {
             setLoading(false);
         }
     };
 
+    // Handle delete
     const handleDelete = async (listingId) => {
         if (window.confirm('Are you sure you want to delete this listing? This action cannot be undone.')) {
             try {
                 setLoading(true);
                 await advertisementService.deleteListing(listingId);
                 
-                // Remove the listing from local state
-                setListings(prevListings => 
-                    prevListings.filter(listing => listing.id !== listingId)
-                );
-                
-                // Update tab counts
-                updateTabCounts(listings.filter(listing => listing.id !== listingId));
+                const updatedListings = listings.filter(listing => listing.id !== listingId);
+                setListings(updatedListings);
+                updateTabCounts(updatedListings);
                 setActiveDropdown(null);
                 
-                // Show success message
                 alert('Listing deleted successfully');
             } catch (error) {
                 console.error('Error deleting listing:', error);
@@ -140,7 +127,7 @@ const ManageListings = () => {
         }
     };
 
-    // Render action buttons based on listing status
+    // Render action button based on status
     const renderActionButton = (status) => {
         switch (status) {
             case 'active':
@@ -154,7 +141,7 @@ const ManageListings = () => {
         }
     };
 
-    // Replace the more-options button and add dropdown menu
+    // Render more options dropdown
     const renderMoreOptionsDropdown = (listing) => (
         <div className="more-options-container-managelisting" ref={dropdownRef}>
             <button 
@@ -193,11 +180,11 @@ const ManageListings = () => {
     );
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="loading-spinner">Loading...</div>;
     }
 
     if (error) {
-        return <div className="error-message">{error}</div>; // Display error message
+        return <div className="error-message">{error}</div>;
     }
 
     return (
@@ -221,7 +208,7 @@ const ManageListings = () => {
                 <div className="listings-grid">
                     {getFilteredListings().map(listing => (
                         <div key={listing.id} className="listing-card">
-                            <div className="listing-image">
+                            <div className="listing-image" >
                                 <img 
                                     src={listing.images && listing.images.length > 0 
                                         ? `http://127.0.0.1:8000${listing.images[0].image_url}` 
@@ -234,7 +221,9 @@ const ManageListings = () => {
                                 <div className="listing-header">
                                     <div>
                                         <h2 className="listing-title">{listing.title}</h2>
-                                        <span className="listing-category">- In {listing.category}</span>
+                                        <span className="listing-category">
+                                            - In {listing.category?.name || listing.category_name || 'Uncategorized'}
+                                        </span>
                                     </div>
                                     <div className="listing-status">
                                         <span className={`status-badge ${listing.status}`}>
@@ -254,20 +243,19 @@ const ManageListings = () => {
                                 </div>
 
                                 <div className="listing-stats">
-                                <div className="stat">
-                                    <FaEye />
-                                    <span>{listing.stats?.views || 0} Views</span>
+                                    <div className="stat">
+                                        <FaEye />
+                                        <span>{listing.stats?.views || 0} Views</span>
+                                    </div>
+                                    <div className="stat">
+                                        <FaCommentAlt />
+                                        <span>{listing.stats?.offers || 0} Offers</span>
+                                    </div>
+                                    <div className="stat">
+                                        <FaCommentAlt />
+                                        <span>{listing.stats?.messages || 0} Messages</span>
+                                    </div>
                                 </div>
-                                <div className="stat">
-                                    <FaCommentAlt />
-                                    <span>{listing.stats?.offers || 0} Offers</span>
-                                </div>
-                                <div className="stat">
-                                    <FaCommentAlt />
-                                    <span>{listing.stats?.messages || 0} Messages</span>
-                                </div>
-                            </div>
-
 
                                 {renderActionButton(listing.status)}
                             </div>

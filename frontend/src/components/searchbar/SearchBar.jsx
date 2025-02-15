@@ -1,28 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import './SearchBar.css';
 
 const SearchBar = () => {
-  // State to manage the search input value
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [locations, setLocations] = useState([]);
 
-  // State to manage the selected location
-  const [selectedLocation, setSelectedLocation] = useState('Pakistan');
+  useEffect(() => {
+    fetchLocations();
+  }, []);
 
-  // Function to handle the search action
-  const handleSearch = () => {
-    if (searchQuery.trim()) {
-      // Example: Navigate to a search results page
-      window.location.href = `/search?query=${encodeURIComponent(
-        searchQuery
-      )}&location=${encodeURIComponent(selectedLocation)}`;
-    } else {
-      alert('Please enter a search term.');
+  const fetchLocations = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/locations/');
+      const data = await response.json();
+      setLocations(data);
+    } catch (error) {
+      console.error('Error fetching locations:', error);
     }
   };
 
-  // Function to handle the Enter key press in the search input
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery)}&location=${encodeURIComponent(selectedLocation)}`);
+    }
+  };
+
   const handleKeyPress = (event) => {
     if (event.key === 'Enter') {
       handleSearch();
@@ -33,7 +40,6 @@ const SearchBar = () => {
     <div className="search-container">
       <div className="search-wrapper">
         <div className="search-content">
-          {/* Location Dropdown */}
           <div className="location-wrapper-searchbar">
             <FontAwesomeIcon icon={faLocationDot} className="location-icon" />
             <select
@@ -41,13 +47,15 @@ const SearchBar = () => {
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
             >
-              <option value="Pakistan">Pakistan</option>
-              <option value="Canada">Canada</option>
-              {/* Add more options as needed */}
+              <option value="">All Locations</option>
+              {locations.map((location) => (
+                <option key={location.id} value={location.city}>
+                  {location.city}, {location.state}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Search Input */}
           <div className="search-input-wrapper">
             <input
               type="text"
@@ -55,7 +63,7 @@ const SearchBar = () => {
               className="search-input-searchbar"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={handleKeyPress} // Trigger search on Enter key press
+              onKeyPress={handleKeyPress}
             />
             <button className="search-button" onClick={handleSearch}>
               <FontAwesomeIcon icon={faSearch} />

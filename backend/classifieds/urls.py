@@ -1,7 +1,7 @@
 #classifieds/urls.py
 
 from django.urls import path, include
-from .views import  AdvertisementListView ,GetAdvertismenet, OfferViewSet, ChatViewSet, NotificationViewSet, LocationListCreateView, LocationDetailView, LocationSearchView
+from .views import  AdvertisementListView ,GetAdvertismenet, OfferViewSet, ChatViewSet, NotificationViewSet, LocationListCreateView, LocationDetailView, LocationSearchView,get_condition_choices
 from . import views
 from rest_framework.routers import DefaultRouter
 
@@ -9,7 +9,7 @@ from rest_framework.routers import DefaultRouter
 router = DefaultRouter()
 router.register(r'offers', OfferViewSet, basename='offer')
 router.register(r'chats', ChatViewSet, basename='chat')
-router.register(r'notifications', NotificationViewSet, basename='notification')
+router.register(r'notifications', NotificationViewSet, basename='notification')     
 
 urlpatterns = [
     
@@ -20,6 +20,7 @@ urlpatterns = [
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
     path('profile/', views.get_user_profile, name='profile'),
+    # path('profile/update/', views.update_profile, name='update_profile'),
     path('kyc/approve/<int:kyc_id>/', views.approve_kyc, name='approve_kyc'),
 
     path('categories/', views.CategoryListView.as_view(), name='categories'),
@@ -27,8 +28,10 @@ urlpatterns = [
     path('categories/<slug:slug>/subcategories/', views.SubCategoryListView.as_view(), name='subcategory-list'),
     
     path('advertisements/featured/', views.FeaturedAdvertisementsView.as_view(), name='featured-ads'),
-    path('advertisements/search/', views.SearchAdvertisementsView.as_view(), name='search-ads'),
+    # path('advertisements/search/', views.SearchAdvertisementsView.as_view(), name='search-ads'),
     path('advertisements/<int:pk>/report/', views.ReportAdvertisementView.as_view(), name='report-ad'),
+    path('condition-choices/', get_condition_choices, name='condition-choices'),
+    # path('api/advertisements/conditions/', views.get_condition_choices, name='condition-choices'),
 
     path('user/dashboard/', views.UserDashboardView.as_view(), name='user-dashboard'),
     path('', include(router.urls)),
@@ -50,4 +53,5 @@ urlpatterns = [
     path('locations/', LocationListCreateView.as_view(), name='location-list-create'),
     path('locations/<int:pk>/', LocationDetailView.as_view(), name='location-detail'),
     path('locations/search/', LocationSearchView.as_view(), name='location-search'),
+    path('advertisements/search/', views.search_advertisements, name='search-advertisements'),
 ]
