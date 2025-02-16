@@ -13,8 +13,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated,IsAdminUser
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from .serializers import UserSerializer, RegisterSerializer
-from .models import User, Advertisement, KYC, Category,SubCategory, Offer, ChatRoom, Notification, Favorite, ChatMessage
-from .serializers import AdvertisementSerializer, CategorySerializer, SubCategorySerializer, CategoryDetailSerializer, OfferSerializer, ChatMessageSerializer, NotificationSerializer
+from .models import User, Advertisement, Image,KYC, Category,SubCategory, Offer, ChatRoom, Notification, Favorite, ChatMessage
+from .serializers import AdvertisementSerializer,ImageSerializer, CategorySerializer, SubCategorySerializer, CategoryDetailSerializer, OfferSerializer, ChatMessageSerializer, NotificationSerializer
 from rest_framework import generics, filters, viewsets,permissions
 from rest_framework.views import APIView
 from .serializers import ReportSerializer
@@ -24,6 +24,18 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import Location
 from .serializers import LocationSerializer
+
+from rest_framework.parsers import MultiPartParser, FormParser  # ✅ Import here
+
+class ImageUploadView(APIView):
+    parser_classes = (MultiPartParser, FormParser)  # Required for handling file uploads
+
+    def post(self, request, *args, **kwargs):
+        serializer = ImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def get_condition_choices(request):
@@ -38,6 +50,53 @@ def get_condition_choices(request):
     return Response(formatted_choices)
 
 # Location List and Create View
+class CountryListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        # Get distinct countries from Location model
+        countries = Location.objects.values('country').distinct().order_by('country')
+        country_list = [
+            {
+                'code': country['country'],
+                'name': country['country'],
+                'id': index
+            } for index, country in enumerate(countries, 1)
+        ]
+        return Response(country_list)
+
+class CityListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, country, state):
+        # Fetch cities based on country and state
+        cities = Location.objects.filter(country=country, state=state)
+        city_list = [
+            {
+                'code': city.city,  # Accessing the city attribute directly
+                'name': city.city,
+                'id': index
+            } for index, city in enumerate(cities, 1)
+        ]
+        return Response(city_list)
+
+class StateListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, country):
+        # Get states for a specific country
+        states = Location.objects.filter(country=country)\
+            .values('state').distinct().order_by('state')
+        state_list = [
+            {
+                'code': state['state'],
+                'name': state['state'],
+                'id': index
+            } for index, state in enumerate(states, 1)
+        ]
+        return Response(state_list)
+
+# Your existing views can remain...
 class LocationListCreateView(generics.ListCreateAPIView):
     queryset = Location.objects.all()
     serializer_class = LocationSerializer
@@ -162,19 +221,31 @@ def GetAdvertismenet(request, pk):
 @permission_classes([IsAuthenticated])
 def create_advertisement(request):
     try:
-        serializer = AdvertisementSerializer(data=request.data, context={'request': request})  # ✅ Pass context
+        images = request.FILES.getlist('images')  # ✅ Get multiple images
+
+        serializer = AdvertisementSerializer(data=request.data, context={'request': request})
+        
         if serializer.is_valid():
-            print(f"Authenticated User: {request.user}")
-            serializer.save(user=request.user)  # Assign logged-in user
+            advertisement = serializer.save(user=request.user)  # ✅ Assign logged-in user
+
+            # ✅ Handle Image Uploads
+            image_instances = []
+            for index, image in enumerate(images):
+                is_primary = index == 0  # ✅ Set first image as primary
+                image_instance = Image(advertisement=advertisement, image=image, is_primary=is_primary)
+                image_instances.append(image_instance)
+
+            if image_instances:
+                Image.objects.bulk_create(image_instances)  # ✅ Bulk create images
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            print(serializer.errors)  # Debugging line
+            print(serializer.errors)  # Debugging
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     except Exception as e:
-        print(f"Error: {e}")  # Debugging line
+        print(f"Error: {e}")  # Debugging
         return Response({"error": "Something went wrong"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):

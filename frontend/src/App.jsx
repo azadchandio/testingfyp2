@@ -30,14 +30,23 @@ import ProductDetail from './components/product/ProductDetail'
 import Messages from './components/Messages/Messages'
 import SearchResults from './pages/SearchResults'
 import AdminPanel from './components/Admin/AdminPanel'
-
+import KYCVerification from './components/kyc/KYCVerification'
 // Protected Route Component
-const ProtectedRoute = ({ children, adminOnly }) => {
-  const { isAuthenticated, loading } = useAuth();
+const ProtectedRoute = ({ children, adminOnly = false }) => {
+  const { user, isAuthenticated, loading } = useAuth();
   
-  if (loading) return <div>Loading...</div>;
-  if (!isAuthenticated) return <Navigate to="/login" />;
-  if (adminOnly && !isAuthenticated) return <Navigate to="/" />;
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+
+  if (adminOnly && !(user?.is_staff || user?.is_superuser)) {
+    return <Navigate to="/" />;
+  }
+
   return children;
 };
 
@@ -119,6 +128,7 @@ const App = () => {
               <Route path="/listing/details/:categoryId/:subCategoryId" element={<ListingDetails />} />
               
               <Route path="/search" element={<SearchResults />} />
+              <Route path="/kyc" element={<KYCVerification />} />
 
               <Route 
                 path="/admin" 

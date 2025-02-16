@@ -141,9 +141,9 @@ class SubCategory(models.Model):
 
 # Location Model
 class Location(models.Model):
-    country = models.CharField(max_length=100)
-    state = models.CharField(max_length=100)
-    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=100 ,null=True,blank=True)
+    state = models.CharField(max_length=100,null=True,blank=True)
+    city = models.CharField(max_length=100,null=True,blank=True)
     created_by = models.ForeignKey(
         User,  # Direct reference to the User model
         on_delete=models.CASCADE,
@@ -183,7 +183,7 @@ class Advertisement(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
-    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True)
     condition = models.CharField(max_length=20, choices=CONDITION_CHOICES)
     brand = models.CharField(max_length=100, null=True, blank=True)
     tags = models.CharField(max_length=200, null=True, blank=True)

@@ -49,12 +49,13 @@ class LocationSerializer(serializers.ModelSerializer):
         model = Location
         fields = ['id', 'country', 'state', 'city', 'created_by']
         read_only_fields = ['created_by']
-        
+
+       
 # AdvertisementSerializer with LocationSerializer
 class AdvertisementSerializer(serializers.ModelSerializer):
     images = ImageSerializer(many=True, read_only=True)
     user = UserSerializer(read_only=True)
-    location = LocationSerializer()
+    location = LocationSerializer(required=False, allow_null=True)
     metrics = serializers.SerializerMethodField()
     listing_metrics = serializers.SerializerMethodField()
 
@@ -117,6 +118,7 @@ class AdvertisementSerializer(serializers.ModelSerializer):
 
         instance.save()
         return instance
+
     
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

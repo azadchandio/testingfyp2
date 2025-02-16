@@ -1,9 +1,8 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect } from 'react';
-
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaListUl, FaQuestionCircle, FaCog, FaSignOutAlt, FaEnvelope, FaBell } from 'react-icons/fa';
+import { FaUser, FaListUl, FaQuestionCircle, FaCog, FaSignOutAlt, FaEnvelope, FaBell, FaShieldAlt } from 'react-icons/fa';
 import './UserDropdown.css';
 import profile from '../../assets/car.png';
 import { advertisementService } from '../../services/advertisement.service';
@@ -12,16 +11,15 @@ const UserDropdown = ({ isOpen, onClose }) => {
   const [unreadMessages, setUnreadMessages] = useState(0);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const navigate = useNavigate();
-  const { user, logout } = useAuth(); // Get user from AuthContext
+  const { user, logout } = useAuth();
 
-  // Improved user data handling
   const userData = {
     name: user?.name || localStorage.getItem('userName') || 'Guest User',
     avatar: user?.avatar || localStorage.getItem('userAvatar') || profile,
-    email: user?.email || localStorage.getItem('userEmail') || ''
+    email: user?.email || localStorage.getItem('userEmail') || '',
+    isAdmin: user?.is_staff || user?.is_superuser || false
   };
 
-  // Add useEffect to fetch unread counts
   useEffect(() => {
     const fetchUnreadCounts = async () => {
       try {
@@ -54,6 +52,13 @@ const UserDropdown = ({ isOpen, onClose }) => {
       icon: <FaListUl />,
       action: () => navigate('/manage-listings')
     },
+    // Show Admin Panel only for admin users
+    ...(userData.isAdmin ? [{
+      id: 'admin-panel',
+      label: 'Admin Panel',
+      icon: <FaShieldAlt />,
+      action: () => navigate('/admin')
+    }] : []),
     {
       id: 'help-support',
       label: 'Help & Support',
@@ -85,7 +90,7 @@ const UserDropdown = ({ isOpen, onClose }) => {
       label: 'Logout',
       icon: <FaSignOutAlt />,
       action: () => {
-        logout(); // Use the logout function from AuthContext
+        logout();
         navigate('/login');
         onClose();
       }
@@ -97,23 +102,24 @@ const UserDropdown = ({ isOpen, onClose }) => {
   return (
     <div className="dropdown-overlay" onClick={onClose}>
       <div className="dropdown-menu" onClick={e => e.stopPropagation()}>
-        {/* User Info Section */}
         <div className="user-info">
           <div className="avatar">
             <img 
               src={userData.avatar} 
               alt={userData.name} 
-              onError={(e) => { e.target.src = profile; }} // Fallback to default profile if image fails
+              onError={(e) => { e.target.src = profile; }}
             />
           </div>
           <div className="user-details">
             <p className="greeting">Hi, Welcome</p>
             <h3 className="username">{userData.name}</h3>
             <p className="user-email">{userData.email}</p>
+            {userData.isAdmin && (
+              <span className="admin-badge">Admin</span>
+            )}
           </div>
         </div>
 
-        {/* Menu Items */}
         <div className="menu-items">
           {menuItems.map(item => (
             <button
