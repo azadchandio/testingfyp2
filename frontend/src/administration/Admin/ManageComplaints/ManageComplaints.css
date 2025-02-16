@@ -1,0 +1,68 @@
+.content-area-staff {
+    padding: 24px;
+  }
+  
+  .table-container-staff {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+  }
+  
+  .table-staff {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table-staff thead tr {
+    background: #F4F7FE;
+  }
+  
+  .table-staff th, .table-staff td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #E0E5F2;
+    color: #2B3674;
+  }
+  
+  .status-badge-staff {
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  
+  .status-badge-staff.pending {
+    color: #FFB547; /* Orange for pending */
+    background: #FFF6E5; /* Light orange background */
+  }
+  
+  .status-badge-staff.solved {
+    color: #01B574; /* Green for solved */
+    background: #E6FAF5; /* Light green background */
+  }
+  
+  .action-buttons-staff {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .action-btn-staff {
+    border: none;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: opacity 0.2s;
+  }
+  
+  .action-btn-staff.reply {
+    background: #E6F0FF;
+    color: #007BFF; /* Blue for reply */
+  }
+  
+  .action-btn-staff.delete {
+    background: #FFE5E5;
+    color: #FF5252; /* Red for delete */
+  }
+  
+  .action-btn-staff:hover {
+    opacity: 0.8;
+  }

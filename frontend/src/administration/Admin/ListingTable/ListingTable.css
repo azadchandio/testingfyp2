@@ -1,0 +1,115 @@
+/* Add these base table styles */
+.table-staff {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-staff thead tr {
+  background: #F4F7FE;
+}
+
+.table-staff th {
+  padding: 16px;
+  text-align: left;
+  color: #2B3674;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.table-staff td {
+  padding: 16px;
+  border-bottom: 1px solid #E0E5F2;
+  color: #2B3674;
+  font-size: 14px;
+}
+
+/* Base status badge style */
+.status-badge-staff {
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Status-specific styles */
+.status-badge-staff.status-featured {
+  background: #E6FAF5; /* Light green background */
+  color: #01B574; /* Dark green text */
+}
+
+.status-badge-staff.status-active {
+  background: #E6FAF5; /* Light green background */
+  color: #01B574; /* Dark green text */
+}
+
+.status-badge-staff.status-inactive {
+  background: #FFF6E5; /* Light yellow background */
+  color: #FFB547; /* Dark yellow text */
+}
+
+.status-badge-staff.status-banned {
+  background: #FFE5E5; /* Light red background */
+  color: #FF5252; /* Dark red text */
+}
+
+/* Action buttons styles */
+.action-buttons-staff {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-btn-staff {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  transition: opacity 0.2s;
+}
+
+.action-btn-staff.view-staff {
+  background: #E6FAF5;
+  color: #01B574;
+}
+
+.action-btn-staff.delete-staff {
+  background: #FFE5E5;
+  color: #FF5252;
+}
+
+.action-btn-staff.moderate-staff {
+  background: #F4F7FE;
+  color: #4318FF;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.action-btn-staff:hover {
+  opacity: 0.8;
+}
+
+/* Listed by styles */
+.listed-by-staff {
+  display: flex;
+  flex-direction: column;
+}
+
+.listed-by-staff .name-staff {
+  color: #2B3674;
+  font-weight: 500;
+}
+
+.listed-by-staff .phone-staff {
+  color: #707EAE;
+  font-size: 13px;
+  margin-top: 2px;
+}
+
+/* Listing ID style */
+.listing-id-staff {
+  color: #4318FF;
+  font-weight: 500;
+}

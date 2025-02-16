@@ -1,0 +1,146 @@
+.super-admin-monitor-activity {
+  background-color: #eceef4;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.super-admin-activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.super-admin-title-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.super-admin-title-section h2 {
+  font-size: 18px;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.super-admin-count-badge {
+  background-color: #f3f4f6;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.super-admin-search-section {
+  display: flex;
+  gap: 16px;
+}
+
+.super-admin-search-box {
+  position: relative;
+}
+
+.super-admin-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+}
+
+.super-admin-search-input {
+  padding: 8px 12px 8px 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 200px;
+}
+
+.super-admin-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.super-admin-table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead tr {
+  background-color: #f8f9fa;
+}
+
+th {
+  padding: 12px 16px;
+  text-align: left;
+  color: #4b5563;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.super-admin-admin-id {
+  color: #2563eb;
+}
+
+.super-admin-date-time {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #4b5563;
+  white-space: nowrap;
+}
+
+.super-admin-print-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #eff6ff;
+  color: #2563eb;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.super-admin-print-btn:hover {
+  background-color: #dbeafe;
+}
+
+.super-admin-print-icon {
+  font-size: 16px;
+}
+
+@media (max-width: 1024px) {
+  .super-admin-activity-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .super-admin-search-section {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .super-admin-table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 800px;
+  }
+}

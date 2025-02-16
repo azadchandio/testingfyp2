@@ -1,0 +1,108 @@
+.super-admin-sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  height: 100vh;
+  padding: 20px 0;
+  border-right: 1px solid #e5e7eb;
+}
+
+.super-admin-logo-section {
+  padding: 0 24px 24px;
+}
+
+.super-admin-logo {
+  color: #1a56db;
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.super-admin-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.super-admin-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.super-admin-nav-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.super-admin-nav-item {
+  cursor: pointer;
+  padding: 0 16px;
+}
+
+.super-admin-nav-item-header {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  color: #1e40af;
+  transition: background-color 0.2s;
+}
+
+.super-admin-nav-item-header:hover {
+  background-color: #f3f4f6;
+}
+
+.super-admin-nav-item.active .super-admin-nav-item-header {
+  background-color: #f3f4f6;
+}
+
+.super-admin-nav-icon {
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.super-admin-submenu {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0 8px 48px;
+}
+
+.super-admin-submenu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  color: #6b7280;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.super-admin-submenu-item:hover {
+  color: #1e40af;
+  background-color: #f3f4f6;
+}
+
+.super-admin-badge {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+/* Animation for submenu */
+.super-admin-submenu {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

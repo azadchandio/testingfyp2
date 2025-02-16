@@ -1,0 +1,45 @@
+.logo-staff{
+  cursor: pointer;
+}
+.menu-group-staff {
+  margin-bottom: 10px;
+}
+
+.menu-header-staff {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px;
+  background: #F4F7FE;
+  border-radius: 8px;
+}
+
+.submenu-staff {
+  padding-left: 20px;
+}
+
+.submenu-item-staff {
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #707EAE;
+}
+
+.submenu-item-staff:hover {
+  background: #E6F0FF;
+}
+
+.submenu-item-staff.active {
+  font-weight: bold;
+  color: #2B3674;
+  background: #E6F0FF;
+
+}
+
+.arrow-icon-staff {
+  margin-left: auto;
+  transition: transform 0.3s;
+}
+
+.arrow-icon-staff.rotated {
+  transform: rotate(180deg);
+}

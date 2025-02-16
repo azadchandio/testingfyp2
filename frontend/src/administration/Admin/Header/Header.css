@@ -1,0 +1,35 @@
+.header-staff {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+}
+
+.header-title-staff h1 {
+  color: #2B3674;
+  margin: 0;
+  font-size: 24px;
+}
+
+.header-title-staff span {
+  color: #707EAE;
+  font-size: 14px;
+}
+
+.header-actions-staff {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notifications-staff {
+  position: relative;
+  cursor: pointer;
+}
+
+.profile-pic-staff img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}

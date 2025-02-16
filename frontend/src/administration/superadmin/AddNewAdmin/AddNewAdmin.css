@@ -1,0 +1,96 @@
+.super-admin-add-admin-container {
+  background-color: #eceef4;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.super-admin-form-title {
+  color: #7e8fff;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.super-admin-admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.super-admin-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.super-admin-input-group {
+  position: relative;
+  margin-top: 16px;
+}
+
+.super-admin-input-group label {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 400;
+  background: rgba(255, 255, 255, 0.644);
+  padding: 0 4px;
+  transition: all 0.2s;
+}
+
+.super-admin-input-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1f2937;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.super-admin-input-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.super-admin-input-group input:focus + label,
+.super-admin-input-group input:not(:placeholder-shown) + label {
+  top: -10px;
+  left: 12px;
+  font-size: 12px;
+  color: #2563eb;
+}
+
+.super-admin-input-group input::placeholder {
+  color: transparent; /* Hide placeholder */
+}
+
+.super-admin-create-btn {
+  background-color: #3b5998;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.super-admin-create-btn:hover {
+  background-color: #344e86;
+}
+
+@media (max-width: 640px) {
+  .super-admin-add-admin-container {
+    margin: 16px;
+    padding: 16px;
+  }
+}

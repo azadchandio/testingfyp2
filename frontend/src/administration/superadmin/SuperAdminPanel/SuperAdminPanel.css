@@ -1,0 +1,70 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.super-admin-container {
+  font-family: "Manrope", serif;
+  display: flex;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+.super-admin-main-content {
+  flex: 1;
+  padding: 24px 32px;
+}
+
+.super-admin-main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.super-admin-welcome-text {
+  font-size: 20px;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+.super-admin-owner-tag {
+  font-size: 14px;
+  color: #6b7280;
+  margin-left: 8px;
+}
+
+.super-admin-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.super-admin-notification-badge {
+  position: relative;
+  cursor: pointer;
+}
+
+.super-admin-bell-icon {
+  font-size: 20px;
+  color: #ef4444;
+}
+
+.super-admin-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 50%;
+}
+
+.super-admin-profile-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #d1d5db;
+}

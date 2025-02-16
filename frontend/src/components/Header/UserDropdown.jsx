@@ -17,7 +17,8 @@ const UserDropdown = ({ isOpen, onClose }) => {
     name: user?.name || localStorage.getItem('userName') || 'Guest User',
     avatar: user?.avatar || localStorage.getItem('userAvatar') || profile,
     email: user?.email || localStorage.getItem('userEmail') || '',
-    isAdmin: user?.is_staff || user?.is_superuser || false
+    isStaff: user?.is_staff || false,
+    isSuperuser: user?.is_superuser || false
   };
 
   useEffect(() => {
@@ -40,6 +41,20 @@ const UserDropdown = ({ isOpen, onClose }) => {
   }, [user]);
 
   const menuItems = [
+    // Show Super Admin Panel for superusers
+    ...(userData.isSuperuser ? [{
+      id: 'super-admin-panel',
+      label: 'Super Admin Panel',
+      icon: <FaShieldAlt />,
+      action: () => navigate('/super-admin')
+    }] : []),
+    // Show Staff Admin Panel for staff members who are not superusers
+    ...(userData.isStaff && !userData.isSuperuser ? [{
+      id: 'staff-admin-panel',
+      label: 'Staff Admin Panel',
+      icon: <FaShieldAlt />,
+      action: () => navigate('/staff-admin')
+    }] : []),
     {
       id: 'edit-profile',
       label: 'Edit Profile',
@@ -52,13 +67,6 @@ const UserDropdown = ({ isOpen, onClose }) => {
       icon: <FaListUl />,
       action: () => navigate('/manage-listings')
     },
-    // Show Admin Panel only for admin users
-    ...(userData.isAdmin ? [{
-      id: 'admin-panel',
-      label: 'Admin Panel',
-      icon: <FaShieldAlt />,
-      action: () => navigate('/admin')
-    }] : []),
     {
       id: 'help-support',
       label: 'Help & Support',
@@ -114,8 +122,11 @@ const UserDropdown = ({ isOpen, onClose }) => {
             <p className="greeting">Hi, Welcome</p>
             <h3 className="username">{userData.name}</h3>
             <p className="user-email">{userData.email}</p>
-            {userData.isAdmin && (
-              <span className="admin-badge">Admin</span>
+            {userData.isSuperuser && (
+              <span className="admin-badge">Super Admin</span>
+            )}
+            {userData.isStaff && !userData.isSuperuser && (
+              <span className="admin-badge">Staff Admin</span>
             )}
           </div>
         </div>
