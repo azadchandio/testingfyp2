@@ -129,7 +129,7 @@ const ManageListings = () => {
 
     // Handle edit
     const handleEdit = (listing) => {
-        navigate(`/listing/details/${listing.category?.slug}/${listing.subcategory?.slug}?edit=${listing.id}`);
+        navigate(`/listing/edit/${listing.id}`);
         setActiveDropdown(null);
     };
 

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import './ListingDetails.css'
+import { advertisementService } from '../../services/advertisement.service';
 const MAX_IMAGES = 5;
 
-const ListingDetails = ({ editId }) => {
+const ListingDetails = () => {
+  const { id } = useParams();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -28,34 +30,66 @@ const ListingDetails = ({ editId }) => {
   const [conditionChoices, setConditionChoices] = useState([]);
   const [states, setStates] = useState([]);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch categories on component mount
-    fetch('/api/categories/')
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
-      .catch((error) => console.error('Error fetching categories:', error));
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            // Fetch categories on component mount
+            const categoriesData = await fetch('/api/categories/').then(res => res.json());
+            setCategories(categoriesData);
 
-    // Fetch countries on mount
-    fetch('/api/locations/countries/')
-      .then((res) => res.json())
-      .then((data) => setCountries(data))
-      .catch((error) => console.error('Error fetching countries:', error));
+            // Fetch countries
+            const countriesData = await fetch('/api/locations/countries/').then(res => res.json());
+            setCountries(countriesData);
 
-    // Fetch condition choices on mount
-    fetch('/api/condition-choices/')
-      .then((res) => res.json())
-      .then((data) => setConditionChoices(data))
-      .catch((error) => console.error('Error fetching condition choices:', error));
+            // Fetch condition choices
+            const conditionsData = await fetch('/api/condition-choices/').then(res => res.json());
+            setConditionChoices(conditionsData);
 
-    if (editId) {
-      setIsEditMode(true);
-      fetch(`/api/listings/${editId}/`)
-        .then((res) => res.json())
-        .then((data) => setFormData(data))
-        .catch((error) => console.error('Error fetching listing details:', error));
-    }
-  }, [editId]);
+            // If in edit mode (id exists), fetch the listing data
+            if (id) {
+                setIsEditMode(true);
+                const listingData = await advertisementService.getAdvertisementById(id);
+                
+                // Transform the data to match form structure
+                const transformedData = {
+                    title: listingData.title,
+                    description: listingData.description,
+                    price: listingData.price,
+                    category: listingData.category,
+                    subcategory: listingData.subcategory,
+                    condition: listingData.condition,
+                    location: {
+                        country: listingData.location?.country || '',
+                        state: listingData.location?.state || '',
+                        city: listingData.location?.city || '',
+                    },
+                    images: listingData.images || [],
+                };
+
+                setFormData(transformedData);
+
+                // If there's a category, fetch its subcategories
+                if (listingData.category) {
+                    const subcategoriesData = await fetch(`/api/categories/${listingData.category}/subcategories/`).then(res => res.json());
+                    setSubcategories(subcategoriesData);
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            setErrors(prev => ({
+                ...prev,
+                general: 'Error loading form data'
+            }));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    fetchData();
+  }, [id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -178,258 +212,235 @@ const ListingDetails = ({ editId }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submission started"); // Debug log
 
     if (!validateForm()) {
-      return;
+        return;
     }
 
-    const formDataToSend = new FormData();
+    try {
+        const formDataToSend = new FormData();
 
-    // Add basic fields
-    formDataToSend.append('title', formData.title);
-    formDataToSend.append('description', formData.description);
-    formDataToSend.append('price', formData.price);
-    formDataToSend.append('condition', formData.condition);
+        // Add basic fields
+        formDataToSend.append('title', formData.title);
+        formDataToSend.append('description', formData.description);
+        formDataToSend.append('price', formData.price);
+        formDataToSend.append('condition', formData.condition);
+        formDataToSend.append('category', formData.category);
+        formDataToSend.append('subcategory', formData.subcategory);
 
-    // Convert category and subcategory slugs to IDs
-    const selectedCategory = categories.find(cat => cat.slug === formData.category);
-    const selectedSubcategory = subcategories.find(subcat => subcat.slug === formData.subcategory);
+        // Handle location
+        const locationData = {
+            country: formData.location.country,
+            state: formData.location.state,
+            city: formData.location.city,
+        };
+        formDataToSend.append('location', JSON.stringify(locationData));
 
-    formDataToSend.append('category', selectedCategory?.id || '');
-    formDataToSend.append('subcategory', selectedSubcategory?.id || '');
-
-    // For location, create location object
-    const selectedCountry = countries.find(c => c.name === formData.location.country);
-    const selectedState = states.find(s => s.name === formData.location.state);
-    const selectedCity = cities.find(c => c.name === formData.location.city);
-
-    const locationData = {
-      country: selectedCountry?.name || '',
-      state: selectedState?.name || '',
-      city: selectedCity?.name || '',
-    };
-
-    formDataToSend.append('location', JSON.stringify(locationData));
-
-    // Handle images
-    formData.images.forEach((file) => {
-      formDataToSend.append('images', file);
-    });
-
-    // Add authorization header
-    const AuthToken = localStorage.getItem('token');
-    if (!AuthToken) {
-      console.error('No authentication token found');
-      return;
-    }
-
-    fetch(isEditMode 
-      ? `http://127.0.0.1:8000/api/advertisements/${editId}/`
-      : 'http://127.0.0.1:8000/api/advertisements/create/', {
-      method: isEditMode ? 'PUT' : 'POST',
-      headers: {
-        'Authorization': `Bearer ${AuthToken}`,
-      },
-      body: formDataToSend,  // Send FormData, not JSON
-    })
-    .then(res => {
-      if (!res.ok) {
-        return res.json().then(data => {
-          throw new Error(JSON.stringify(data));
+        // Handle images - only append new images
+        formData.images.forEach((file) => {
+            if (file instanceof File) {
+                formDataToSend.append('images', file);
+            }
         });
-      }
-      return res.json();
-    })
-    .then(data => {
-      console.log('Success:', data);
-      navigate('/manage-listings');
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      try {
-        const errorData = JSON.parse(error.message);
+
+        console.log("isEditMode:", isEditMode); // Debug log
+        console.log("id:", id); // Debug log
+
+        if (isEditMode && id) {
+            console.log("Updating advertisement..."); // Debug log
+            const response = await advertisementService.updateAdvertisement(id, formDataToSend);
+            console.log("Update response:", response); // Debug log
+        } else {
+            console.log("Creating new advertisement..."); // Debug log
+            await advertisementService.createAdvertisement(formDataToSend);
+        }
+
+        navigate('/manage-listings');
+    } catch (error) {
+        console.error('Error submitting form:', error);
         setErrors(prev => ({
-          ...prev,
-          submit: JSON.stringify(errorData, null, 2)
+            ...prev,
+            submit: error.response?.data?.message || 'Error submitting form'
         }));
-      } catch {
-        setErrors(prev => ({
-          ...prev,
-          submit: error.message
-        }));
-      }
-    });
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="listing-form">
-      <div className="form-group">
-        <input
-          type="text"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          placeholder="Title"
-          className="form-input"
-        />
-        {errors.title && <p className="error-message">{errors.title}</p>}
-      </div>
+    <>
+        {loading ? (
+            <div className="loading-spinner">Loading...</div>
+        ) : (
+            <form onSubmit={handleSubmit} className="listing-form">
+                <div className="form-group">
+                    <input
+                        type="text"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="Title"
+                        className="form-input"
+                    />
+                    {errors.title && <p className="error-message">{errors.title}</p>}
+                </div>
 
-      <div className="form-group">
-        <textarea
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          placeholder="Description"
-          className="form-input"
-        />
-        {errors.description && <p className="error-message">{errors.description}</p>}
-      </div>
+                <div className="form-group">
+                    <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        placeholder="Description"
+                        className="form-input"
+                    />
+                    {errors.description && <p className="error-message">{errors.description}</p>}
+                </div>
 
-      <div className="form-group">
-        <input
-          type="number"
-          name="price"
-          value={formData.price}
-          onChange={handleChange}
-          placeholder="Price"
-          className="form-input"
-        />
-        {errors.price && <p className="error-message">{errors.price}</p>}
-      </div>
+                <div className="form-group">
+                    <input
+                        type="number"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        placeholder="Price"
+                        className="form-input"
+                    />
+                    {errors.price && <p className="error-message">{errors.price}</p>}
+                </div>
 
-      <div className="form-group">
-        <select
-          name="category"
-          value={formData.category}
-          onChange={handleCategoryChange}
-          className="form-input"
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.slug}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-        {errors.category && <p className="error-message">{errors.category}</p>}
-      </div>
+                <div className="form-group">
+                    <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleCategoryChange}
+                        className="form-input"
+                    >
+                        <option value="">Select Category</option>
+                        {categories.map((cat) => (
+                            <option key={cat.id} value={cat.slug}>
+                                {cat.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.category && <p className="error-message">{errors.category}</p>}
+                </div>
 
-      <div className="form-group">
-        <select
-          name="subcategory"
-          value={formData.subcategory}
-          onChange={handleChange}
-          disabled={!formData.category}
-          className="form-input"
-        >
-          <option value="">Select Subcategory</option>
-          {subcategories.map((subcat) => (
-            <option key={subcat.id} value={subcat.slug}>
-              {subcat.name}
-            </option>
-          ))}
-        </select>
-        {errors.subcategory && <p className="error-message">{errors.subcategory}</p>}
-      </div>
+                <div className="form-group">
+                    <select
+                        name="subcategory"
+                        value={formData.subcategory}
+                        onChange={handleChange}
+                        disabled={!formData.category}
+                        className="form-input"
+                    >
+                        <option value="">Select Subcategory</option>
+                        {subcategories.map((subcat) => (
+                            <option key={subcat.id} value={subcat.slug}>
+                                {subcat.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.subcategory && <p className="error-message">{errors.subcategory}</p>}
+                </div>
 
-      <div className="form-group">
-        <select
-          name="condition"
-          value={formData.condition}
-          onChange={handleChange}
-          className="form-input"
-        >
-          <option value="">Select Condition</option>
-          {conditionChoices.map((cond) => (
-            <option key={cond.value} value={cond.value}>
-              {cond.label}
-            </option>
-          ))}
-        </select>
-        {errors.condition && <p className="error-message">{errors.condition}</p>}
-      </div>
+                <div className="form-group">
+                    <select
+                        name="condition"
+                        value={formData.condition}
+                        onChange={handleChange}
+                        className="form-input"
+                    >
+                        <option value="">Select Condition</option>
+                        {conditionChoices.map((cond) => (
+                            <option key={cond.value} value={cond.value}>
+                                {cond.label}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.condition && <p className="error-message">{errors.condition}</p>}
+                </div>
 
-      <div className="form-group">
-        <select
-          name="country"
-          value={formData.location.country}
-          onChange={handleCountryChange}
-          className="form-input"
-        >
-          <option value="">Select Country</option>
-          {countries.map((country) => (
-            <option key={country.id} value={country.name}>
-              {country.name}
-            </option>
-          ))}
-        </select>
-        {errors.country && <p className="error-message">{errors.country}</p>}
-      </div>
+                <div className="form-group">
+                    <select
+                        name="country"
+                        value={formData.location.country}
+                        onChange={handleCountryChange}
+                        className="form-input"
+                    >
+                        <option value="">Select Country</option>
+                        {countries.map((country) => (
+                            <option key={country.id} value={country.name}>
+                                {country.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.country && <p className="error-message">{errors.country}</p>}
+                </div>
 
-      <div className="form-group">
-        <select
-          name="state"
-          value={formData.location.state}
-          onChange={handleStateChange}
-          disabled={!formData.location.country}
-          className="form-input"
-        >
-          <option value="">
-            {!formData.location.country
-              ? "Select Country First"
-              : "Select State"}
-          </option>
-          {states.map((state) => (
-            <option key={state.id} value={state.name}>
-              {state.name}
-            </option>
-          ))}
-        </select>
-        {errors.state && <p className="error-message">{errors.state}</p>}
-      </div>
+                <div className="form-group">
+                    <select
+                        name="state"
+                        value={formData.location.state}
+                        onChange={handleStateChange}
+                        disabled={!formData.location.country}
+                        className="form-input"
+                    >
+                        <option value="">
+                            {!formData.location.country
+                                ? "Select Country First"
+                                : "Select State"}
+                        </option>
+                        {states.map((state) => (
+                            <option key={state.id} value={state.name}>
+                                {state.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.state && <p className="error-message">{errors.state}</p>}
+                </div>
 
-      <div className="form-group">
-        <select
-          name="city"
-          value={formData.location.city}
-          onChange={handleChange}
-          disabled={!formData.location.state}
-          className="form-input"
-        >
-          <option value="">
-            {!formData.location.state
-              ? "Select State First"
-              : "Select City"}
-          </option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.name}>
-              {city.name}
-            </option>
-          ))}
-        </select>
-        {errors.city && <p className="error-message">{errors.city}</p>}
-      </div>
+                <div className="form-group">
+                    <select
+                        name="city"
+                        value={formData.location.city}
+                        onChange={handleChange}
+                        disabled={!formData.location.state}
+                        className="form-input"
+                    >
+                        <option value="">
+                            {!formData.location.state
+                                ? "Select State First"
+                                : "Select City"}
+                        </option>
+                        {cities.map((city) => (
+                            <option key={city.id} value={city.name}>
+                                {city.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.city && <p className="error-message">{errors.city}</p>}
+                </div>
 
-      <div className="form-group">
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleFileChange}
-          className="form-input"
-        />
-        {errors.images && <p className="error-message">{errors.images}</p>}
-      </div>
+                <div className="form-group">
+                    <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileChange}
+                        className="form-input"
+                    />
+                    {errors.images && <p className="error-message">{errors.images}</p>}
+                </div>
 
-      <button type="submit" className="submit-button">
-        Submit
-      </button>
+                <button type="submit" className="submit-button">
+                    Submit
+                </button>
 
-      {errors.submit && <pre className="error-message">{errors.submit}</pre>}
-    </form>
+                {errors.submit && <pre className="error-message">{errors.submit}</pre>}
+            </form>
+        )}
+    </>
   );
 };
 

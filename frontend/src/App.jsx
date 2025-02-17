@@ -146,6 +146,11 @@ const App = () => {
             <Route path="/terms" element={<Terms />} />
             <Route path="/listing/subcategory/:slug" element={<SubCategory />} />
             <Route path="/listing/details/:categoryId/:subCategoryId" element={<ListingDetails />} />
+            <Route path="/listing/edit/:id" element={
+              <ProtectedRoute>
+                <ListingDetails />
+              </ProtectedRoute>
+            } />
             
             <Route path="/search" element={<SearchResults />} />
             <Route path="/kyc" element={<KYCVerification />} />

@@ -31,8 +31,6 @@ export const advertisementService = {
         }
     },
     
-
-
     
     getAdvertisement: async (id) => {
         const response = await fetch(`/api/advertisements/${id}/`);
@@ -83,11 +81,6 @@ export const advertisementService = {
         });
         return response.data;
     },
-
-    // getUserAdvertisements: async () => {
-    //     const response = await api.get('/advertisements/user/');
-    //     return response.data;
-    // },
 
     getFavorites: async () => {
         const response = await api.get('/advertisements/favorites/');
@@ -175,19 +168,6 @@ export const advertisementService = {
         }
     },
 
-    updateAdvertisement: async (id, data) => {
-        const response = await fetch(`/api/advertisements/${id}/`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
-        if (!response.ok) throw new Error('Failed to update advertisement');
-        return response.json();
-    },
-
     updateListingStatus: async (listingId, newStatus) => {
         try {
             const token = localStorage.getItem('token');
@@ -223,6 +203,49 @@ export const advertisementService = {
             return response.data;
         } catch (error) {
             console.error('Error deleting listing:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+
+    getAdvertisementById: async (id) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`${API_URL}${id}/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching advertisement:', error);
+            throw error;
+        }
+    },
+
+    updateAdvertisement: async (id, data) => {
+        try {
+            console.log("Sending PATCH request with data:", data); // Debug log
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            const response = await axios.patch(
+                `${API_URL}${id}/`,
+                data,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        // Don't set Content-Type when sending FormData
+                        // axios will set it automatically with the correct boundary
+                    },
+                }
+            );
+            console.log("PATCH response:", response.data); // Debug log
+            return response.data;
+        } catch (error) {
+            console.error('Error updating advertisement:', error.response || error);
             throw error;
         }
     },

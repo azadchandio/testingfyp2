@@ -183,9 +183,9 @@ class AdvertisementUpdateView(generics.UpdateAPIView):
             )
         return advertisement
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+    def patch(self, request, *args, **kwargs):
         instance = self.get_object()
+        print("Received PATCH data:", request.data)  # Debug log
         
         # Handle location data if it's present as a JSON string
         if 'location' in request.data and isinstance(request.data['location'], str):
@@ -193,19 +193,23 @@ class AdvertisementUpdateView(generics.UpdateAPIView):
                 request.data._mutable = True
                 request.data['location'] = json.loads(request.data['location'])
                 request.data._mutable = False
-            except (ValueError, AttributeError):
+            except (ValueError, AttributeError) as e:
+                print("Error parsing location:", e)  # Debug log
                 pass
 
         serializer = self.get_serializer(
             instance, 
             data=request.data, 
-            partial=partial
+            partial=True
         )
         
         if serializer.is_valid():
+            print("Serializer is valid")  # Debug log
             self.perform_update(serializer)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print("Serializer errors:", serializer.errors)  # Debug log
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
 def AdvertisementListView(request):
