@@ -177,13 +177,13 @@ const ProductDetail = () => {
       return (
         <div className="owner-actions">
           <button 
-            className="edit-button"
+            className="edit-button-product"
             onClick={() => navigate(`/listing/edit/${product.id}`)}
           >
             <FaEdit /> Edit Listing
           </button>
           <button 
-            className="feature-button"
+            className="feature-button-product"
             onClick={handleFeatureListing}
           >
             <FaStar /> Feature Listing
@@ -196,7 +196,7 @@ const ProductDetail = () => {
     return (
       <div className="buyer-actions">
         <button 
-          className="message-button"
+          className="message-button-product"
           onClick={() => setShowMessageModal(true)}
         >
           <FaEnvelope /> Message Seller

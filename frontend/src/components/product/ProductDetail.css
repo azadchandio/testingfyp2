@@ -129,36 +129,40 @@
     margin: 1.5rem 0;
   }
   
-  .message-button,
-  .edit-button {
+  .message-button-product,
+  .edit-button-product {
     display: flex;
+    justify-content: center;
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.3s ease;
   }
   
-  .message-button {
+  .message-button-product {
     background-color: #38528F;
     color: white;
   }
   
-  .message-button:hover {
-    background-color: #2c3e6f;
+  .message-button-product:hover {
+    background-color: #ffff;
+    color: #38528F;
+    border: 1px solid #38528F;
   }
   
-  .edit-button {
-    background-color: #4CAF50;
-    color: white;
+  .edit-button-product {
+    background-color: #ffff;
+    color: #F57D26;
+    border: 1px solid #F57D26;
   }
   
-  .edit-button:hover {
+  /* .edit-button-product:hover {
     background-color: #388E3C;
-  }
+  } */
   
   .seller-info {
     width: 100%;
@@ -326,8 +330,8 @@
       flex-direction: column;
     }
   
-    .message-button,
-    .edit-button {
+    .message-button-product,
+    .edit-button-product {
       width: 100%;
       justify-content: center;
     }
@@ -490,12 +494,15 @@
   .owner-actions,
   .buyer-actions {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
     width: 100%;
   }
   
-  .feature-button {
-    background-color: #F57D26;
+  .feature-button-product {
+    display: flex;
+    justify-content: center;
+    background-color: #38528F;
     color: white;
     display: flex;
     align-items: center;
@@ -508,18 +515,23 @@
     transition: all 0.3s ease;
   }
   
-  .feature-button:hover {
-    background-color: #d86a1f;
+  .feature-button-product:hover {
+    background-color: #ffff;
+    color: #38528F;
+    border: 1px solid #38528F;
+    
   }
   
   .offer-button {
+    display: flex;
+    justify-content: center;
     background-color: #F57D26;
     color: white;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
@@ -527,7 +539,9 @@
   }
   
   .offer-button:hover {
-    background-color: #d86a1f;
+    background-color: #FFFF;
+    color: #F57D26;
+    border: 1px solid #F57D26;
   }
   
   .no-image {

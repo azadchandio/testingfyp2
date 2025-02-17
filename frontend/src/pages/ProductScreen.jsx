@@ -71,8 +71,8 @@ const ProductScreen = () => {
                 </div>
               </div>
 
-              <button className="feature-button">Feature This Listing</button>
-              <button className="edit-button">
+              <button className="feature-button--product">Feature This Listing</button>
+              <button className="edit-button-product">
                 <FaPencilAlt className="edit-icon" /> Edit Now
               </button>
             </div>
