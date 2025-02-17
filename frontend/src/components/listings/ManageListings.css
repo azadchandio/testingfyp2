@@ -113,8 +113,6 @@
   color: #dc3545;
 }
 
-
-
 .listing-stats {
   display: flex;
   align-items: center;
@@ -239,4 +237,47 @@
 
 .dropdown-item-managelisting.delete:hover {
   background-color: #fff5f5;
+}
+
+.action-buttons-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.edit-button {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    border: 1px solid #38528F;
+    color: #38528F;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-button:hover {
+    background: #38528F;
+    color: white;
+}
+
+.feature-button,
+.republish-button,
+.recover-button {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .action-buttons-container {
+        flex-direction: column;
+    }
+    
+    .edit-button,
+    .feature-button,
+    .republish-button,
+    .recover-button {
+        width: 100%;
+    }
 }

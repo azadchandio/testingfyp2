@@ -127,21 +127,50 @@ const ManageListings = () => {
         }
     };
 
-    // Render action button based on status
-    const renderActionButton = (status) => {
-        switch (status) {
-            case 'active':
-                return <button className="feature-button">Feature This Listing</button>;
-            case 'inactive':
-                return <button className="republish-button">Republish Now</button>;
-            case 'deleted':
-                return <button className="recover-button">Recover Now</button>;
-            default:
-                return null;
-        }
+    // Handle edit
+    const handleEdit = (listing) => {
+        navigate(`/listing/details/${listing.category?.slug}/${listing.subcategory?.slug}?edit=${listing.id}`);
+        setActiveDropdown(null);
     };
 
-    // Render more options dropdown
+    // Update renderActionButton to include both feature and edit buttons
+    const renderActionButton = (listing) => {
+        const buttons = [];
+        
+        // Add appropriate feature button based on status
+        switch (listing.status) {
+            case 'active':
+                buttons.push(
+                    <button key="feature" className="feature-button">Feature This Listing</button>
+                );
+                break;
+            case 'inactive':
+                buttons.push(
+                    <button key="republish" className="republish-button">Republish Now</button>
+                );
+                break;
+            case 'deleted':
+                buttons.push(
+                    <button key="recover" className="recover-button">Recover Now</button>
+                );
+                break;
+        }
+        
+        // Add edit button
+        buttons.push(
+            <button 
+                key="edit" 
+                className="edit-button"
+                onClick={() => handleEdit(listing)}
+            >
+                <FaEdit /> Edit Now
+            </button>
+        );
+        
+        return <div className="action-buttons-container">{buttons}</div>;
+    };
+
+    // Update renderMoreOptionsDropdown to remove edit option
     const renderMoreOptionsDropdown = (listing) => (
         <div className="more-options-container-managelisting" ref={dropdownRef}>
             <button 
@@ -257,7 +286,7 @@ const ManageListings = () => {
                                     </div>
                                 </div>
 
-                                {renderActionButton(listing.status)}
+                                {renderActionButton(listing)}
                             </div>
                         </div>
                     ))}

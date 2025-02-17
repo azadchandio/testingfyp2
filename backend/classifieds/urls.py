@@ -1,7 +1,7 @@
 #classifieds/urls.py
 
 from django.urls import path, include
-from .views import  AdvertisementListView ,GetAdvertismenet, OfferViewSet, ChatViewSet, NotificationViewSet, LocationListCreateView, LocationDetailView, LocationSearchView,get_condition_choices,CountryListView,CityListView, StateListView, ImageUploadView
+from .views import  AdvertisementListView ,AdvertisementUpdateView,GetAdvertismenet, OfferViewSet, ChatViewSet, NotificationViewSet, LocationListCreateView, LocationDetailView, LocationSearchView,get_condition_choices,CountryListView,CityListView, StateListView, ImageUploadView
 from . import views
 from rest_framework.routers import DefaultRouter
 
@@ -57,5 +57,6 @@ urlpatterns = [
     path('locations/states/<str:country>/', StateListView.as_view(), name='state-list'),
     path('locations/cities/<str:country>/<str:state>/', CityListView.as_view(), name='city-list'),
     path('advertisements/search/', views.search_advertisements, name='search-advertisements'),
+    path('advertisements/<int:pk>/update/', AdvertisementUpdateView.as_view(), name='advertisement-update'),
 
 ]

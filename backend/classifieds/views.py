@@ -4,6 +4,7 @@ from django.utils.timezone import now
 from django.db.models import Q
 from django.utils import timezone
 from django.db.models import Sum
+import json
 
 # Create your views here.
 
@@ -167,6 +168,45 @@ class LocationSearchView(generics.ListAPIView):
 
         return queryset
 
+class AdvertisementUpdateView(generics.UpdateAPIView):
+    queryset = Advertisement.objects.all()
+    serializer_class = AdvertisementSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    def get_object(self):
+        advertisement = get_object_or_404(Advertisement, id=self.kwargs['pk'])
+        if advertisement.user != self.request.user:
+            self.permission_denied(
+                self.request, 
+                message="You do not have permission to edit this advertisement."
+            )
+        return advertisement
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        # Handle location data if it's present as a JSON string
+        if 'location' in request.data and isinstance(request.data['location'], str):
+            try:
+                request.data._mutable = True
+                request.data['location'] = json.loads(request.data['location'])
+                request.data._mutable = False
+            except (ValueError, AttributeError):
+                pass
+
+        serializer = self.get_serializer(
+            instance, 
+            data=request.data, 
+            partial=partial
+        )
+        
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET'])
 def AdvertisementListView(request):
     user_id = request.query_params.get('user_id')  # Get user_id from query parameters
@@ -177,7 +217,7 @@ def AdvertisementListView(request):
     serializer = AdvertisementSerializer(advertisements, many=True)
     return Response(serializer.data)
 
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'PATCH', 'DELETE'])
 def GetAdvertismenet(request, pk):
     advertisement = get_object_or_404(Advertisement, id=pk)
     
@@ -188,7 +228,7 @@ def GetAdvertismenet(request, pk):
         serializer = AdvertisementSerializer(advertisement)
         return Response(serializer.data)
     
-    # For PUT and DELETE, require authentication and ownership
+    # For PUT, PATCH and DELETE, require authentication and ownership
     if not request.user.is_authenticated:
         return Response(
             {'error': 'Authentication required'},
@@ -201,12 +241,12 @@ def GetAdvertismenet(request, pk):
             status=status.HTTP_403_FORBIDDEN
         )
     
-    if request.method == 'PUT':
+    if request.method in ['PUT', 'PATCH']:
         serializer = AdvertisementSerializer(
             advertisement, 
             data=request.data, 
             context={'request': request},
-            partial=True
+            partial=request.method == 'PATCH'  # Allow partial updates for PATCH
         )
         if serializer.is_valid():
             serializer.save()
