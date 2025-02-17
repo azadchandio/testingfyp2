@@ -43,18 +43,13 @@ export const advertisementService = {
         return response.json();
     },
 
-    createAdvertisement: async (data) => {
-        const formData = new FormData();
-        Object.keys(data).forEach(key => {
-            if (key === 'images') {
-                data.images.forEach(image => {
-                    formData.append('images', image);
-                });
-            } else {
-                formData.append(key, data[key]);
-            }
+    createAdvertisement: async (formData) => {
+        const response = await api.post('/advertisements/create/', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            },
         });
-        const response = await api.post('/advertisements/', formData);
         return response.data;
     },
 

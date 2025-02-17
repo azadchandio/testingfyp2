@@ -11,7 +11,9 @@ const ListingDetails = () => {
     description: '',
     price: '',
     category: '',
+    category_slug: '',
     subcategory: '',
+    subcategory_slug: '',
     location: {
       country: '',
       state: '',
@@ -31,6 +33,9 @@ const ListingDetails = () => {
   const [states, setStates] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+
+  // Add new state for image previews
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,12 +113,32 @@ const ListingDetails = () => {
 
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
-    setFormData((prev) => ({ ...prev, category: selectedCategory, subcategory: '' }));
+    const categoryId = categories.find(cat => cat.slug === selectedCategory)?.id;
+    
+    setFormData((prev) => ({ 
+        ...prev, 
+        category: categoryId, 
+        category_slug: selectedCategory,
+        subcategory: '',
+        subcategory_slug: '' 
+    }));
+
     // Fetch subcategories for the selected category
     fetch(`/api/categories/${selectedCategory}/subcategories/`)
-      .then((res) => res.json())
-      .then((data) => setSubcategories(data))
-      .catch((error) => console.error('Error fetching subcategories:', error));
+        .then((res) => res.json())
+        .then((data) => setSubcategories(data))
+        .catch((error) => console.error('Error fetching subcategories:', error));
+  };
+
+  const handleSubcategoryChange = (e) => {
+    const selectedSubcategory = e.target.value;
+    const subcategoryId = subcategories.find(subcat => subcat.slug === selectedSubcategory)?.id;
+    
+    setFormData((prev) => ({ 
+        ...prev, 
+        subcategory: subcategoryId,
+        subcategory_slug: selectedSubcategory 
+    }));
   };
 
   const handleCountryChange = (e) => {
@@ -181,18 +206,37 @@ const ListingDetails = () => {
     }
   };
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length + formData.images.length > MAX_IMAGES) {
-      setErrors((prev) => ({
-        ...prev,
-        images: `You can only upload up to ${MAX_IMAGES} images`,
-      }));
-      return;
-    }
+  // Update handleFileChange to handle single image selection
+  const handleFileChange = (e, index) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Create a copy of the current images array
+    const newImages = [...formData.images];
+    newImages[index] = file;
+    
+    setFormData(prev => ({
+      ...prev,
+      images: newImages
+    }));
+
     setErrors((prev) => ({ ...prev, images: '' }));
-    setFormData((prev) => ({ ...prev, images: [...prev.images, ...files] }));
   };
+
+  // Update handleRemoveImage
+  const handleRemoveImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => i === index ? null : img)
+    }));
+  };
+
+  // Clean up preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
 
   const validateForm = () => {
     let newErrors = {};
@@ -214,7 +258,7 @@ const ListingDetails = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submission started"); // Debug log
+    console.log("Form submission started");
 
     if (!validateForm()) {
         return;
@@ -239,22 +283,19 @@ const ListingDetails = () => {
         };
         formDataToSend.append('location', JSON.stringify(locationData));
 
-        // Handle images - only append new images
+        // Handle images - only append non-null images
         formData.images.forEach((file) => {
             if (file instanceof File) {
                 formDataToSend.append('images', file);
             }
         });
 
-        console.log("isEditMode:", isEditMode); // Debug log
-        console.log("id:", id); // Debug log
-
         if (isEditMode && id) {
-            console.log("Updating advertisement..."); // Debug log
-            const response = await advertisementService.updateAdvertisement(id, formDataToSend);
-            console.log("Update response:", response); // Debug log
+            console.log("Updating advertisement...");
+            await advertisementService.updateAdvertisement(id, formDataToSend);
         } else {
-            console.log("Creating new advertisement..."); // Debug log
+            console.log("Creating new advertisement...");
+            // Use the correct endpoint for creating advertisements
             await advertisementService.createAdvertisement(formDataToSend);
         }
 
@@ -312,7 +353,7 @@ const ListingDetails = () => {
                 <div className="form-group">
                     <select
                         name="category"
-                        value={formData.category}
+                        value={formData.category_slug}
                         onChange={handleCategoryChange}
                         className="form-input"
                     >
@@ -329,8 +370,8 @@ const ListingDetails = () => {
                 <div className="form-group">
                     <select
                         name="subcategory"
-                        value={formData.subcategory}
-                        onChange={handleChange}
+                        value={formData.subcategory_slug}
+                        onChange={handleSubcategoryChange}
                         disabled={!formData.category}
                         className="form-input"
                     >
@@ -423,13 +464,47 @@ const ListingDetails = () => {
                 </div>
 
                 <div className="form-group">
-                    <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleFileChange}
-                        className="form-input"
-                    />
+                    <div className="image-upload-grid">
+                        {[...Array(MAX_IMAGES)].map((_, index) => (
+                            <div key={index} className="image-upload-slot">
+                                <input
+                                    type="file"
+                                    id={`image-input-${index}`}
+                                    accept="image/*"
+                                    onChange={(e) => handleFileChange(e, index)}
+                                    className="hidden-input"
+                                />
+                                <label htmlFor={`image-input-${index}`} className="image-slot-label">
+                                    {formData.images[index] ? (
+                                        <div className="image-preview-wrapper">
+                                            <img
+                                                src={formData.images[index] instanceof File 
+                                                    ? URL.createObjectURL(formData.images[index])
+                                                    : formData.images[index]}
+                                                alt={`Preview ${index + 1}`}
+                                                className="image-preview"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    handleRemoveImage(index);
+                                                }}
+                                                className="remove-image-btn"
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="empty-slot">
+                                            <span className="plus-icon">+</span>
+                                            <span className="upload-text">Upload Image</span>
+                                        </div>
+                                    )}
+                                </label>
+                            </div>
+                        ))}
+                    </div>
                     {errors.images && <p className="error-message">{errors.images}</p>}
                 </div>
 

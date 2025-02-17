@@ -24,13 +24,15 @@ import SavedListings from './components/listings/SavedListings'
 import ManageListings from './components/listings/ManageListings'
 
 import ProductDetail from './components/product/ProductDetail'
-import Messages from './components/Messages/Messages'
+import MessageBox from './components/messages/MessageBox'
 import SearchResults from './pages/SearchResults'
 import KYCVerification from './components/kyc/KYCVerification'
 
 // admin & super admin routes
 import AdminPanel from './administration/Admin/AdminPanel/AdminPanel'
 import SuperAdminPanel from './administration/superadmin/SuperAdminPanel/SuperAdminPanel'
+
+
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -138,7 +140,7 @@ const App = () => {
             } />
             <Route path="/messages" element={
               <ProtectedRoute>
-                <Messages />
+                <MessageBox />
               </ProtectedRoute>
             } />
 
@@ -155,14 +157,6 @@ const App = () => {
             <Route path="/search" element={<SearchResults />} />
             <Route path="/kyc" element={<KYCVerification />} />
 
-            <Route 
-              path="/staff-admin" 
-              element={
-                <ProtectedRoute adminOnly>
-                  <AdminPanel />
-                </ProtectedRoute>
-              } 
-            />
 
             <Route 
               path="/super-admin" 
@@ -172,6 +166,16 @@ const App = () => {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/staff-admin" 
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminPanel />
+                </ProtectedRoute>
+              } 
+            />
+
+            <Route path="/admin/messages" element={<MessageBox />} />
           </Routes>
         </Layout>
       </Router>
