@@ -36,6 +36,11 @@ const SearchBar = () => {
     }
   };
 
+  // Format location for display
+  const formatLocation = (location) => {
+    return `${location.city}${location.state ? `, ${location.state}` : ''}`;
+  };
+
   return (
     <div className="search-container">
       <div className="search-wrapper">
@@ -49,8 +54,11 @@ const SearchBar = () => {
             >
               <option value="">All Locations</option>
               {locations.map((location) => (
-                <option key={location.id} value={location.city}>
-                  {location.city}, {location.state}
+                <option 
+                  key={location.id} 
+                  value={location.city}
+                >
+                  {formatLocation(location)}
                 </option>
               ))}
             </select>

@@ -1,46 +1,268 @@
-.search-results-container {
-  max-width: 1200px;
+
+
+.listings-container-search {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1440px; /* Add maximum width */
   margin: 0 auto;
-  padding: 20px;
 }
 
-.search-results-content {
+.filter-section-search {
+  background: rgb(13 0 255 / 5%);
+  padding: 24px;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.filter-group-search {
+  margin-bottom: 24px;
+}
+
+.filter-group-search h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c1c1c;
+  margin-bottom: 16px;
+}
+
+.category-options-search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-item-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.category-item-search input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.category-label-search {
+  font-size: 16px;
+  color: #1c1c1c;
+}
+
+.price-range-search {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.price-input-search {
+  flex: 1;
+  position: relative;
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.price-input-search input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  padding-right: 10px; /* Space for currency */
+}
+
+.currency-search {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.location-selects-search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.location-select-search {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #1c1c1c;
+  background: white;
+  cursor: pointer;
+  appearance: none; /* Remove default arrow */
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%231C1C1C' strokeWidth='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* Add a subtle divider between filter groups */
+.filter-group-search:not(:last-child)::after {
+  content: "";
+  display: block;
+  height: 1px;
+  background: #e0e0e0;
+  margin-top: 24px;
+}
+
+.products-section-search {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.product-card-search {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 20px;
-}
-
-.filters-section {
+  grid-template-columns: 340px 1fr auto;
+  gap: 1.5rem;
+  padding: 1rem;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  position: relative;
+  cursor: pointer;
 }
 
-.results-section {
-  flex: 1;
+.product-image-search {
+  width: 340px;
+  height: 212px;
+  object-fit: scale-down;
+  border-radius: 8px;
 }
 
-.results-header {
-  margin-bottom: 20px;
+.product-info-search {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  font-family: "Manrope", sans-serif;
 }
 
-.results-header h2 {
-  color: #38528F;
-  margin-bottom: 8px;
+.product-info-search h3 {
+  font-family: "Manrope", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: #38528f;
+  margin: 0;
+  line-height: 1.2;
 }
 
-.results-header span {
-  color: #666;
+.product-header-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
 }
 
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+.product-price-search {
+  font-family: "Manrope", sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  color: #f57d26;
+  margin: 8px 0;
 }
 
-@media (max-width: 768px) {
-  .search-results-content {
-    grid-template-columns: 1fr;
-  }
-} 
+.product-details-search {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.location-search,
+.time-search {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #38528f;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.location-icon-search,
+.time-icon-search {
+  width: 24px;
+  height: 24px;
+  color: #38528f;
+}
+
+/* Location icon styling */
+.location-icon-search::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338528F'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
+}
+
+/* Time icon styling */
+.time-icon-search::before {
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2338528F'%3E%3Cpath d='M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z'/%3E%3C/svg%3E");
+}
+
+.product-actions-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 200px; /* Fixed width for buttons */
+  align-self: center; /* Center vertically */
+}
+
+.message-now-search,
+.send-offer-search {
+  font-family: "Manrope", sans-serif;
+  font-weight: 600;
+  width: 100%;
+  max-width: 20rem;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: "Manrope", sans-serif;
+}
+
+.message-now-search {
+  background: #4267b2;
+  color: white;
+}
+
+.send-offer-search {
+  background: #f57d26;
+  color: white;
+}
+
+
+
+/* TEMP */
+.search-input-search {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+/* TEMP */
