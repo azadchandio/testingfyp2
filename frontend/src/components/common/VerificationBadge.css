@@ -1,0 +1,15 @@
+.verification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(56, 82, 143, 0.1);
+  color: #38528F;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.verification-badge svg {
+  flex-shrink: 0;
+} 

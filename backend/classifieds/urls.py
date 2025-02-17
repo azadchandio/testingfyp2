@@ -22,6 +22,7 @@ urlpatterns = [
     path('profile/', views.get_user_profile, name='user-profile'),
     path('profile/update/', views.update_profile, name='update-profile'),
     path('kyc/approve/<int:kyc_id>/', views.approve_kyc, name='approve_kyc'),
+    path('kyc/submit/', views.submit_kyc, name='submit_kyc'),
 
     path('categories/', views.CategoryListView.as_view(), name='categories'),
     path('categories/<slug:slug>/', views.CategoryDetailView.as_view(), name='category-detail'),

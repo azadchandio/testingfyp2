@@ -27,6 +27,7 @@ import ProductDetail from './components/product/ProductDetail'
 import MessageBox from './components/messages/MessageBox'
 import SearchResults from './pages/SearchResults'
 import KYCVerification from './components/kyc/KYCVerification'
+import KYCSuccess from './components/kyc/KYCSuccess'
 
 // admin & super admin routes
 import AdminPanel from './administration/Admin/AdminPanel/AdminPanel'
@@ -156,7 +157,7 @@ const App = () => {
             
             <Route path="/search" element={<SearchResults />} />
             <Route path="/kyc" element={<KYCVerification />} />
-
+            <Route path="/kyc-success" element={<KYCSuccess />} />
 
             <Route 
               path="/super-admin" 

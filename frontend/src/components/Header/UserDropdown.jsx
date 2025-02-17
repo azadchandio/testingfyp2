@@ -62,6 +62,12 @@ const UserDropdown = ({ isOpen, onClose }) => {
       action: () => navigate('/edit-profile')
     },
     {
+      id: 'kfc',
+      label: 'Kyc',
+      icon: <FaUser />,
+      action: () => navigate('/kyc')
+    },
+    {
       id: 'my-listings',
       label: 'My Listings',
       icon: <FaListUl />,

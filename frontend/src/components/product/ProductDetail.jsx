@@ -8,6 +8,7 @@ import { useAuth } from "../../context/AuthContext";
 import { advertisementService } from "../../services/advertisement.service";
 import { messageService } from "../../services/message.service";
 import "./ProductDetail.css";
+import VerificationBadge from '../common/VerificationBadge';
 
 const MessageModal = ({ onClose, onSubmit, loading }) => {
   const [message, setMessage] = useState('');
@@ -221,13 +222,40 @@ const ProductDetail = () => {
           <img
             src={product.user.profile_picture 
               ? `http://127.0.0.1:8000${product.user.profile_picture}`
-              : '/default-avatar.png'} // Add a default avatar image
+              : '/default-avatar.png'}
             alt={product.user.name || 'Seller'}
             className="seller-avatar"
           />
           <div className="seller-details">
             <p className="section-label">Listing Posted By</p>
-            <h3 className="seller-name">{product.user.name || 'Anonymous'}</h3>
+            <div className="seller-name-verification">
+              <h3 className="seller-name">{product.user.name || 'Anonymous'}</h3>
+              {product.user.is_verified ? (
+                <VerificationBadge className="seller-verification-badge" />
+              ) : (
+                <span className="not-verified-badge">
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 16 16" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path 
+                      d="M8 0L9.4 1.4L11.4 0.8L12.2 2.8L14.3 3L14.1 5.1L16 6.4L14.9 8L16 9.6L14.1 10.9L14.3 13L12.2 13.2L11.4 15.2L9.4 14.6L8 16L6.6 14.6L4.6 15.2L3.8 13.2L1.7 13L1.9 10.9L0 9.6L1.1 8L0 6.4L1.9 5.1L1.7 3L3.8 2.8L4.6 0.8L6.6 1.4L8 0Z" 
+                      fill="#6B7280"
+                    />
+                    <path 
+                      d="M5 5L11 11M5 11L11 5" 
+                      stroke="white" 
+                      strokeWidth="2" 
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span>Not Verified</span>
+                </span>
+              )}
+            </div>
             {product.user.contact_phone && (
               <p className="seller-phone">{product.user.contact_phone}</p>
             )}

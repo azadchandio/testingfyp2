@@ -730,3 +730,53 @@ def update_profile(request):
         serializer.save()
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def submit_kyc(request):
+    try:
+        # Debug logging
+        print("Received files:", request.FILES)
+        print("Received data:", request.data)
+
+        # Validate required fields
+        if not request.FILES.get('id_card_front'):
+            return Response(
+                {'error': 'Front side of ID card is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not request.FILES.get('id_card_back'):
+            return Response(
+                {'error': 'Back side of ID card is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Check if user already has pending KYC
+        existing_kyc = KYC.objects.filter(user=request.user, status='pending').first()
+        if existing_kyc:
+            return Response(
+                {'error': 'You already have a pending KYC submission'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Create new KYC submission
+        kyc = KYC(
+            user=request.user,
+            id_card_front=request.FILES['id_card_front'],
+            id_card_back=request.FILES['id_card_back'],
+            kyc_type=request.data.get('kyc_type', 'id_card')
+        )
+        kyc.save()
+
+        return Response({
+            'message': 'KYC submitted successfully',
+            'status': 'pending'
+        }, status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        print("KYC submission error:", str(e))
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
