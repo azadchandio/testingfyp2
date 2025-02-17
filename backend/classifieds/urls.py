@@ -19,8 +19,8 @@ urlpatterns = [
 
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
-    path('profile/', views.get_user_profile, name='profile'),
-    # path('profile/update/', views.update_profile, name='update_profile'),
+    path('profile/', views.get_user_profile, name='user-profile'),
+    path('profile/update/', views.update_profile, name='update-profile'),
     path('kyc/approve/<int:kyc_id>/', views.approve_kyc, name='approve_kyc'),
 
     path('categories/', views.CategoryListView.as_view(), name='categories'),
@@ -58,5 +58,4 @@ urlpatterns = [
     path('locations/cities/<str:country>/<str:state>/', CityListView.as_view(), name='city-list'),
     path('advertisements/search/', views.search_advertisements, name='search-advertisements'),
 
-    path('upload-image/', ImageUploadView.as_view(), name='upload-image'),
 ]

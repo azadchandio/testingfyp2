@@ -3,11 +3,17 @@ from .models import User, Advertisement, Image, Location, Category, SubCategory,
 from django.contrib.auth.password_validation import validate_password
 
 
-# UserSerializer remains the same
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'name', 'is_verified', 'is_staff', 'is_superuser')
+        fields = ('id', 'email', 'name', 'phone_number', 'profile_picture', 'is_verified', 'is_staff', 'is_superuser')
+    
+    def update(self, instance, validated_data):
+        """Custom update method to handle partial updates."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)  # Update only provided fields
+        instance.save()
+        return instance
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

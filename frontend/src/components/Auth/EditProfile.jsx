@@ -1,101 +1,175 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import './global.css'
 import './Editprofile.css'
-import defaultProfileImg from "../../assets/one.jpeg";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
+import axios from 'axios';
 
 const EditProfile = () => {
-  // Create state variables for each form field
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const { user, setUser } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  
+  // Form state
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [dob, setDob] = useState("");
   const [phone, setPhone] = useState("");
   const [gender, setGender] = useState("");
-  const [country, setCountry] = useState("");
-  const [city, setCity] = useState("");
-  const [showPhone, setShowPhone] = useState(true);
+  const [showPhone, setShowPhone] = useState(false);
+  const [profileImg, setProfileImg] = useState("");
 
   // Handle input changes
   const handleChange = (setter) => (event) => setter(event.target.value);
 
+  // Fetch user data on component mount
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const response = await api.get('profile/');
+        const userData = response.data;
+        
+        setName(userData.name || "");
+        setEmail(userData.email || "");
+        setPhone(userData.phone_number || "");
+        setShowPhone(userData.show_phone || false);
+        setGender(userData.gender || "");
+        setDob(userData.date_of_birth || "");
+        
+        // Set profile image URL if it exists
+        if (userData.profile_picture) {
+          setProfileImg(`http://127.0.0.1:8000${userData.profile_picture}`);
+        }
+        
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError("Failed to load profile data");
+        setLoading(false);
+      }
+    };
 
+    fetchUserProfile();
+  }, []);
 
-
-  // Initialize state with a fallback in case the image fails to load
-  const [profileImg, setProfileImg] = useState(() => defaultProfileImg || '');
-
-  const handleImageUpload = (event) => {
+  const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setProfileImg(reader.result);
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append('profile_picture', file);
+
+      try {
+        const response = await api.patch('profile/update/', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+        
+        if (response.data.profile_picture) {
+          setProfileImg(`http://127.0.0.1:8000${response.data.profile_picture}`);
+        }
+      } catch (err) {
+        setError("Failed to upload image");
+        console.error('Image upload error:', err);
+      }
     }
   };
 
+  const handleRemovePhoto = async () => {
+    try {
+      const response = await api.patch('profile/update/', 
+        { profile_picture: null }
+      );
+      setProfileImg("");
+    } catch (err) {
+      setError("Failed to remove photo");
+      console.error('Remove photo error:', err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      const formData = new FormData();
+      
+      // Add text fields
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('phone_number', phone);
+      formData.append('show_phone', showPhone);
+      formData.append('gender', gender);
+      formData.append('date_of_birth', dob);
+
+      const response = await api.patch('profile/update/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+
+      setUser(response.data);
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error('Update error:', err);
+      setError(err.response?.data?.error || "Failed to update profile");
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="main-Content-Container">
-      {/* Image and buttons section */}
+      {error && <div className="error-message">{error}</div>}
+      
       <h2 className="titlee">Edit Profile</h2>
       <div className="edit-profile-container">
-      <div className="profile-section">
-        <div className="profile-image">
-          <img src={profileImg} alt="Profile" className="profile-photo" />
-        </div>
-        <div className="product-actions">
-          <input
-            type="file"
-            accept="image/*"
-            id="upload-photo"
-            style={{ display: 'none' }}
-            onChange={handleImageUpload}
-          />
-          <button className="upload-photo" onClick={() => document.getElementById('upload-photo').click()}>
-            Upload New Photo
-          </button>
-          <button className="remove-photo" onClick={() => setProfileImg(defaultProfileImg)}>
-            Remove Photo
-          </button>
+        <div className="profile-section">
+          <div className="profile-image">
+            <img 
+              src={profileImg || "/api/placeholder/150/150"} 
+              alt="Profile" 
+              className="profile-photo" 
+            />
+          </div>
+          <div className="product-actions">
+            <input
+              type="file"
+              accept="image/*"
+              id="upload-photo"
+              style={{ display: 'none' }}
+              onChange={handleImageUpload}
+            />
+            <button className="upload-photo" onClick={() => document.getElementById('upload-photo').click()}>
+              Upload New Photo
+            </button>
+            <button className="remove-photo" onClick={handleRemovePhoto}>
+              Remove Photo
+            </button>
+          </div>
         </div>
       </div>
-    </div>
 
-      {/* Form section */}
-      <form className="form-container">
-        {/* Row 1 */}
+      <form className="form-container" onSubmit={handleSubmit}>
+        {/* Rest of the form remains the same */}
         <div className="sections">
           <div className="floating-label-container">
             <input
               type="text"
-              id="firstName"
+              id="name"
               className="floating-input"
               placeholder=" "
-              value={firstName}
-              onChange={handleChange(setFirstName)} // Bind to state
+              value={name}
+              onChange={handleChange(setName)}
             />
-            <label htmlFor="firstName" className="floating-label">
-              First Name
-            </label>
-          </div>
-          <div className="floating-label-container">
-            <input
-              type="text"
-              id="lastName"
-              className="floating-input"
-              placeholder=" "
-              value={lastName}
-              onChange={handleChange(setLastName)} // Bind to state
-            />
-            <label htmlFor="lastName" className="floating-label">
-              Last Name
+            <label htmlFor="name" className="floating-label">
+              Name
             </label>
           </div>
         </div>
 
-        {/* Row 2 */}
         <div className="sections">
           <div className="floating-label-container">
             <input
@@ -104,7 +178,7 @@ const EditProfile = () => {
               className="floating-input"
               placeholder=" "
               value={email}
-              onChange={handleChange(setEmail)} // Bind to state
+              onChange={handleChange(setEmail)}
             />
             <label htmlFor="email" className="floating-label">
               Email Address
@@ -116,7 +190,7 @@ const EditProfile = () => {
               id="dob"
               className="floating-input"
               value={dob}
-              onChange={handleChange(setDob)} // Bind to state
+              onChange={handleChange(setDob)}
             />
             <label htmlFor="dob" className="floating-label">
               Date of Birth
@@ -124,7 +198,6 @@ const EditProfile = () => {
           </div>
         </div>
 
-        {/* Row 3 */}
         <div className="sections">
           <div className="floating-label-container">
             <input
@@ -133,7 +206,7 @@ const EditProfile = () => {
               className="floating-input"
               placeholder=" "
               value={phone}
-              onChange={handleChange(setPhone)} // Bind to state
+              onChange={handleChange(setPhone)}
               maxLength={11}
               minLength={10}
             />
@@ -146,7 +219,7 @@ const EditProfile = () => {
               id="gender"
               className="floating-input"
               value={gender}
-              onChange={handleChange(setGender)} // Bind to state
+              onChange={handleChange(setGender)}
             >
               <option value="" disabled hidden></option>
               <option value="male">Male</option>
@@ -158,58 +231,22 @@ const EditProfile = () => {
           </div>
         </div>
 
-        {/* Row 4 */}
-        <div className="sections">
-          <div className="floating-label-container">
-            <select
-              id="country"
-              className="floating-input"
-              value={country}
-              onChange={handleChange(setCountry)} // Bind to state
-            >
-              <option value="" disabled hidden></option>
-              <option value="Pakistan">Pakistan</option>
-              <option value="India">India</option>
-              <option value="USA">USA</option>
-            </select>
-            <label htmlFor="country" className="floating-label">
-              Country
-            </label>
-          </div>
-
-          <div className="floating-label-container">
-            <select
-              id="city"
-              className="floating-input"
-              value={city}
-              onChange={handleChange(setCity)} // Bind to state
-            >
-              <option value="" disabled hidden></option>
-              <option value="Sindh, Hyderabad">Sindh, Hyderabad</option>
-              <option value="Punjab, Lahore">Punjab, Lahore</option>
-              <option value="Sindh, Karachi">Karachi</option>
-            </select>
-            <label htmlFor="city" className="floating-label">
-              State, City
-            </label>
-          </div>
-        </div>
-
-        {/* Row 5 */}
         <div className="sections">
           <div className="centered-container">
-          <label className="remember-me">
-                  <input type="checkbox" />
-                  Show my Phone Number on my Profile
-                </label>
+            <label className="remember-me">
+              <input 
+                type="checkbox"
+                checked={showPhone}
+                onChange={(e) => setShowPhone(e.target.checked)}
+              />
+              Show my Phone Number on my Profile
+            </label>
           </div>
 
-          {/* Submit Button */}
           <div className="centered-container">
             <button type="submit" className="btn-editprofile">
               Save Changes
             </button>
-            <div />
           </div>
         </div>
       </form>
